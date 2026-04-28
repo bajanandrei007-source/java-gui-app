@@ -31,6 +31,12 @@
             <artifactId>json</artifactId>
             <version>20251224</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.update4j</groupId>
+            <artifactId>update4j</artifactId>
+            <version>1.5.9</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -59,7 +65,7 @@
                             </filters>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>SourceCode.Main</mainClass>
+                                    <mainClass>SourceCode.Launcher</mainClass>
                                 </transformer>
                             </transformers>
                             <outputFile>${project.build.directory}/LogicLab.jar</outputFile>

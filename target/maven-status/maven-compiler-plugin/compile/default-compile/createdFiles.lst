@@ -8,6 +8,7 @@ SourceCode\UserInstances\ApiClient$AuthResult.class
 SourceCode\Builders\Levels\Easy\EvenOddApp.class
 SourceCode\Builders\Levels\Easy\HelloWorldApp.class
 SourceCode\Builders\ProfileApplication.class
+SourceCode\Launcher.class
 SourceCode\Builders\MainMenuApplication.class
 SourceCode\Builders\ProfileApplication$2.class
 SourceCode\Builders\CodeEditorApplication$1.class

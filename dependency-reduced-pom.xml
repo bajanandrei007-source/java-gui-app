@@ -29,7 +29,7 @@
               </filters>
               <transformers>
                 <transformer>
-                  <mainClass>SourceCode.Main</mainClass>
+                  <mainClass>SourceCode.Launcher</mainClass>
                 </transformer>
               </transformers>
               <outputFile>${project.build.directory}/LogicLab.jar</outputFile>
