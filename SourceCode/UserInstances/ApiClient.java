@@ -6,6 +6,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import org.json.JSONObject;
 
+private static final String BASE_URL = "https://leetcode-prototype-api-production.up.railway.app";
+
 public class ApiClient {
 
     public static class AuthResult {
@@ -32,7 +34,7 @@ public class ApiClient {
 
         // 2. Build the POST Request
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://leetcode-prototype-api-production.up.railway.app/api/auth/register"))
+                .uri(URI.create(BASE_URL + "/api/auth/register"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
@@ -78,7 +80,7 @@ public class ApiClient {
         String emailJson = String.format("{\"email\":\"%s\"}", email);
         
         HttpRequest hashRequest = HttpRequest.newBuilder()
-                .uri(URI.create("https://leetcode-prototype-api-production.up.railway.app/api/auth/get-hash"))
+                .uri(URI.create(BASE_URL + "/api/auth/get-hash"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(emailJson))
                 .build();
@@ -109,7 +111,7 @@ public class ApiClient {
         String claimJson = String.format("{\"userId\":%d}", dbId);
         
         HttpRequest tokenRequest = HttpRequest.newBuilder()
-                .uri(URI.create("https://leetcode-prototype-api-production.up.railway.app/api/auth/claim-token"))
+                .uri(URI.create(BASE_URL + "/api/auth/claim-token"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(claimJson))
                 .build();
@@ -146,7 +148,7 @@ public class ApiClient {
         );
 
         java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-                .uri(java.net.URI.create("https://leetcode-prototype-api-production.up.railway.app/api/scores"))
+                .uri(java.net.URI.create(BASE_URL + "/api/scores"))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + token)
                 .POST(java.net.http.HttpRequest.BodyPublishers.ofString(jsonBody))
@@ -169,7 +171,7 @@ public class ApiClient {
         
         java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
                 // Make sure this matches exactly where you put the Node.js route!
-                .uri(java.net.URI.create("https://leetcode-prototype-api-production.up.railway.app/api/leaderboard"))
+                .uri(java.net.URI.create(BASE_URL + "/api/leaderboard"))
                 .header("Content-Type", "application/json")
                 .GET()
                 .build();
@@ -204,7 +206,7 @@ public class ApiClient {
         String token = PlayerSession.getInstance().getToken();
 
         java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-                .uri(java.net.URI.create("https://leetcode-prototype-api-production.up.railway.app/api/scores/user/" + userId))
+                .uri(java.net.URI.create(BASE_URL + "/api/scores/user/" + userId))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + token)
                 .GET()
@@ -255,7 +257,7 @@ public class ApiClient {
 
         java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
                 .uri(java.net.URI.create(
-                    "https://leetcode-prototype-api-production.up.railway.app/api/users/check-username/" + encoded))
+                    BASE_URL + "/api/users/check-username/" + encoded))
                 .header("Content-Type", "application/json")
                 .GET()
                 .build();
@@ -306,7 +308,7 @@ public class ApiClient {
         // -- Step 1: GET current profile to retrieve the email --
         java.net.http.HttpRequest getReq = java.net.http.HttpRequest.newBuilder()
                 .uri(java.net.URI.create(
-                    "https://leetcode-prototype-api-production.up.railway.app/api/users/" + userId))
+                    BASE_URL + "/api/users/" + userId))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + token)
                 .GET()
@@ -331,7 +333,7 @@ public class ApiClient {
 
         java.net.http.HttpRequest putReq = java.net.http.HttpRequest.newBuilder()
                 .uri(java.net.URI.create(
-                    "https://leetcode-prototype-api-production.up.railway.app/api/users/" + userId))
+                    BASE_URL + "/api/users/" + userId))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + token)
                 .PUT(java.net.http.HttpRequest.BodyPublishers.ofString(jsonBody))
@@ -361,7 +363,7 @@ public class ApiClient {
         String json = String.format("{\"email\":\"%s\"}", email);
         
         java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-                .uri(java.net.URI.create("https://leetcode-prototype-api-production.up.railway.app/api/auth/send-otp"))
+                .uri(java.net.URI.create(BASE_URL + "/api/auth/send-otp"))
                 .header("Content-Type", "application/json")
                 .POST(java.net.http.HttpRequest.BodyPublishers.ofString(json))
                 .build();
@@ -380,7 +382,7 @@ public class ApiClient {
         String json = String.format("{\"email\":\"%s\", \"otp\":\"%s\"}", email, otp);
         
         java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-                .uri(java.net.URI.create("https://leetcode-prototype-api-production.up.railway.app/api/auth/verify-otp"))
+                .uri(java.net.URI.create(BASE_URL + "/api/auth/verify-otp"))
                 .header("Content-Type", "application/json")
                 .POST(java.net.http.HttpRequest.BodyPublishers.ofString(json))
                 .build();
@@ -402,7 +404,7 @@ public class ApiClient {
         String json = String.format("{\"email\":\"%s\"}", email);
         
         java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-                .uri(java.net.URI.create("https://leetcode-prototype-api-production.up.railway.app/api/auth/forgot-password"))
+                .uri(java.net.URI.create(BASE_URL + "/api/auth/forgot-password"))
                 .header("Content-Type", "application/json")
                 .POST(java.net.http.HttpRequest.BodyPublishers.ofString(json))
                 .build();
@@ -422,7 +424,7 @@ public class ApiClient {
             email, otp, newPasswordHash);
         
         java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-                .uri(java.net.URI.create("https://leetcode-prototype-api-production.up.railway.app/api/auth/reset-password"))
+                .uri(java.net.URI.create(BASE_URL + "/api/auth/reset-password"))
                 .header("Content-Type", "application/json")
                 .POST(java.net.http.HttpRequest.BodyPublishers.ofString(json))
                 .build();
