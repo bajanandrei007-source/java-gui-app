@@ -90,17 +90,16 @@ public class LoginApplication extends JPanel {
         panel.add(passwordPF);
 
         // ── Eye-icon toggle: tries to load image files, falls back to emoji ──
-        java.io.File showFile = new java.io.File("SourceCode/ShowP.png"),
-                     hideFile = new java.io.File("SourceCode/HideP.png");
+        URL showUrl = getClass().getResource("/ShowP.png"),
+            hideUrl = getClass().getResource("/HideP.png");
 
-        if (showFile.exists() && hideFile.exists()) {
-            rawShowImg = new ImageIcon(showFile.getAbsolutePath()).getImage();
-            rawHideImg = new ImageIcon(hideFile.getAbsolutePath()).getImage();
+        if (showUrl != null && hideUrl != null) {
+            rawShowImg = new ImageIcon(showUrl).getImage();
+            rawHideImg = new ImageIcon(hideUrl).getImage();
             showIcon   = new ImageIcon(rawShowImg.getScaledInstance(18, 18, Image.SCALE_SMOOTH));
             hideIcon   = new ImageIcon(rawHideImg.getScaledInstance(18, 18, Image.SCALE_SMOOTH));
             toggleButton = new JButton(showIcon);
         } else {
-            // Unicode eye as plain-text fallback when image files are missing
             toggleButton = new JButton("👁");
             toggleButton.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 14));
         }

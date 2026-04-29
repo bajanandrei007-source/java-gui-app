@@ -59,8 +59,8 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            type: exe
-            ext: exe
+            type: msi
+            ext: msi
             icon: src/main/resources/LogicLab_icon.ico
           - os: macos-latest
             type: dmg
@@ -109,7 +109,8 @@ jobs:
             --dest installer-output \
             --icon ${{ matrix.icon }} \
             --vendor "LogicLab" \
-            --description "LogicLab - Java Programming Challenges"
+            --description "LogicLab - Java Programming Challenges" \
+            ${{ matrix.os == 'windows-latest' && '--win-dir-chooser --win-shortcut --win-menu --win-menu-group LogicLab' || '' }}
 
       - name: Rename installer to remove version number
         shell: bash

@@ -16,7 +16,7 @@ import java.nio.file.StandardCopyOption;
 public class Launcher {
 
     // ── Replace with your actual GitHub username and repo name ──
-    private static final String GITHUB_USER = "your-github-username";
+    private static final String GITHUB_USER = "bajanandrei007-source";
     private static final String GITHUB_REPO = "java-gui-app";
 
     private static final String CONFIG_URL =
@@ -26,39 +26,26 @@ public class Launcher {
         Paths.get(System.getProperty("user.home"), ".logiclab", "LogicLab.jar");
 
     public static void main(String[] args) {
-        try {
-            // Show a simple loading message
-            System.out.println("LogicLab Launcher — checking for updates...");
-
-            // Fetch the remote version config
-            URL configUrl = new URL(CONFIG_URL);
-            try (InputStream in = configUrl.openStream();
-                 InputStreamReader reader = new InputStreamReader(in)) {
-
-                Configuration config = Configuration.read(reader);
-
-                // Create install directory if it doesn't exist
-                Files.createDirectories(LOCAL_JAR.getParent());
-
-                // Check and apply updates if needed
-                if (config.requiresUpdate()) {
-                    System.out.println("Update found! Downloading...");
-                    config.update(UpdateOptions.archive(LOCAL_JAR.getParent()));
-                    System.out.println("Update complete. Relaunching...");
-                } else {
-                    System.out.println("Already up to date.");
-                }
-            }
-
             // Launch the actual app
             launchApp();
 
-        } catch (Exception e) {
-            // If update check fails (no internet, etc.), still launch the app
-            System.err.println("Update check failed: " + e.getMessage());
-            System.out.println("Launching app without update check...");
-            launchApp();
-        }
+        new Thread(() -> {
+            try {
+                URL configUrl = new URL(CONFIG_URL);
+                try (InputStream in = configUrl.openStream();
+                    InputStreamReader reader = new InputStreamReader(in)) {
+                    Configuration config = Configuration.read(reader);
+                    Files.createDirectories(LOCAL_JAR.getParent());
+                    if (config.requiresUpdate()) {
+                        System.out.println("Update found! Downloading in background...");
+                        config.update(UpdateOptions.archive(LOCAL_JAR.getParent()));
+                        System.out.println("Update downloaded. Will apply on next launch.");
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Update check failed: " + e.getMessage());
+            }
+        }, "update-checker").start();
     }
 
     private static void launchApp() {
