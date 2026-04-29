@@ -8,6 +8,7 @@
 /bin/
 /out/
 /build/
+/target/
 
 # Logs
 *.log
@@ -17,10 +18,11 @@
 .idea/
 *.iml
 
-# API folder - has its own repo, exclude sensitive parts
-api/node_modules/
-api/.env
-api/.env.*
+# API folder - exclude entirely
+api/
+
+# Outside libraries - managed by Maven
+/OutsideLibraries/
 
 # Windows files
 desktop.ini
