@@ -93,7 +93,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p jpackage-input
-          mv LogicLab.jar jpackage-input/
+          mv target/LogicLab.jar jpackage-input/
 
       - name: Build installer with jpackage
         shell: bash
