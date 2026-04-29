@@ -59,8 +59,8 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            type: msi
-            ext: msi
+            type: exe
+            ext: exe
             icon: src/main/resources/LogicLab_icon.ico
           - os: macos-latest
             type: dmg
