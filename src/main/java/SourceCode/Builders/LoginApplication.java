@@ -5,6 +5,7 @@ import SourceCode.UserInstances.PlayerSession;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.net.URL;
 
 /**
  * LoginApp — a JPanel card used inside Main's CardLayout deck.
