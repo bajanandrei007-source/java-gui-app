@@ -65,7 +65,7 @@ jobs:
           - os: macos-latest
             type: dmg
             ext: dmg
-            icon: src/main/resources/LogicLab_icon.png
+            icon: src/main/resources/LogicLab_icon.icns
           - os: ubuntu-latest
             type: deb
             ext: deb
