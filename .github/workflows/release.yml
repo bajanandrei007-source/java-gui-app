@@ -42,17 +42,12 @@ jobs:
           </configuration>
           EOF
 
-      - name: Prepare clean jpackage input
-        run: |
-          mkdir -p jpackage-input
-          cp target/LogicLab.jar jpackage-input/
-
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
         with:
           name: LogicLab-jar
           path: |
-            jpackage-input/LogicLab.jar
+            target/LogicLab.jar
             version.xml
 
   # ─────────────────────────────────────────
@@ -92,7 +87,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: LogicLab-jar
-          path: jpackage-input/
+          path: ./
+
+      - name: Prepare jpackage input
+        shell: bash
+        run: |
+          mkdir -p jpackage-input
+          mv LogicLab.jar jpackage-input/
 
       - name: Build installer with jpackage
         shell: bash
