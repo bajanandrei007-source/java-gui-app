@@ -398,7 +398,7 @@ public class JavaJudge {
     private static final String CLASS_NAME      = "UserSolution";
 
     /** Temporary directory where the .java and .class files are written and then deleted. */
-    private static final File   TEMP_DIR        = new File("temp");
+    private static final File   TEMP_DIR        = new File(System.getProperty("java.io.tmpdir"), "logiclab-judge");
 
     /**
      * Compiles and executes user-submitted Java code against a list of test cases.
