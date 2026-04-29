@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LogicLab — Download</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0b0f0e;
+      --surface: #131a18;
+      --surface2: #1a2420;
+      --border: rgba(80,200,140,0.12);
+      --accent: #3ddc84;
+      --accent2: #00c896;
+      --text: #e8f0ec;
+      --muted: #7a9e8e;
+      --danger: #ff6b6b;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(61,220,132,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(61,220,132,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Glow blob */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 600px;
+      background: radial-gradient(ellipse at center, rgba(61,220,132,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header */
+    header {
+      padding: 60px 0 20px;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(61,220,132,0.3);
+      padding: 4px 14px;
+      border-radius: 99px;
+      margin-bottom: 28px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(52px, 9vw, 96px);
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .tagline {
+      margin-top: 20px;
+      font-size: 17px;
+      color: var(--muted);
+      font-weight: 300;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .version-chip {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 16px;
+      animation: fadeUp 0.6s 0.25s ease both;
+    }
+
+    .version-chip span {
+      color: var(--accent2);
+    }
+
+    /* Download section */
+    .download-section {
+      margin: 56px 0;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .cards { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color 0.2s, transform 0.2s, background 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at top left, rgba(61,220,132,0.05), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .card:hover {
+      border-color: rgba(61,220,132,0.35);
+      transform: translateY(-3px);
+      background: var(--surface2);
+    }
+
+    .card:hover::before { opacity: 1; }
+
+    .os-icon {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .os-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--text);
+    }
+
+    .os-ext {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .dl-btn {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(61,220,132,0.1);
+      border: 1px solid rgba(61,220,132,0.25);
+      color: var(--accent);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 18px;
+      border-radius: 10px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .dl-btn:hover {
+      background: rgba(61,220,132,0.18);
+      border-color: rgba(61,220,132,0.5);
+      color: #fff;
+    }
+
+    .dl-btn svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
+
+    /* Warning */
+    .warnings {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 56px;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+
+    .warn-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent2);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .warn-box.red { border-left-color: var(--danger); }
+
+    .warn-icon {
+      font-size: 16px;
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    .warn-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .warn-body {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .warn-body code {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      background: rgba(61,220,132,0.08);
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    /* Steps */
+    .steps-section {
+      margin-bottom: 64px;
+      animation: fadeUp 0.6s 0.45s ease both;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      background: rgba(61,220,132,0.08);
+      border: 1px solid rgba(61,220,132,0.2);
+      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-weight: 500;
+    }
+
+    .step-text {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .step-text strong {
+      display: block;
+      color: var(--text);
+      font-weight: 500;
+      margin-bottom: 2px;
+      font-size: 14px;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 32px 0 48px;
+      border-top: 1px solid var(--border);
+      animation: fadeUp 0.6s 0.5s ease both;
+    }
+
+    footer p {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="badge">Free Download</div>
+    <h1>Logic<em>Lab</em></h1>
+    <p class="tagline">A Java coding challenge platform for students. Download, install, and start solving.</p>
+    <div class="version-chip">Latest release &nbsp;·&nbsp; <span>v1.0.0</span></div>
+  </header>
+
+  <div class="download-section">
+    <p class="section-label">Choose your platform</p>
+    <div class="cards">
+
+      <!-- Windows -->
+      <div class="card">
+        <div class="os-icon">🪟</div>
+        <div class="os-name">Windows</div>
+        <div class="os-ext">installer · .exe</div>
+        <a class="dl-btn" target="_blank" rel="noopener noreferrer"
+           href="https://github.com/bajanandrei007-source/java-gui-app/releases/latest/download/LogicLab.exe">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download .exe
+        </a>
+      </div>
+
+      <!-- macOS -->
+      <div class="card">
+        <div class="os-icon">🍎</div>
+        <div class="os-name">macOS</div>
+        <div class="os-ext">disk image · .dmg</div>
+        <a class="dl-btn" target="_blank" rel="noopener noreferrer"
+           href="https://github.com/bajanandrei007-source/java-gui-app/releases/latest/download/LogicLab.dmg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download .dmg
+        </a>
+      </div>
+
+      <!-- Linux -->
+      <div class="card">
+        <div class="os-icon">🐧</div>
+        <div class="os-name">Linux</div>
+        <div class="os-ext">package · .deb</div>
+        <a class="dl-btn" target="_blank" rel="noopener noreferrer"
+           href="https://github.com/bajanandrei007-source/java-gui-app/releases/latest/download/LogicLab.deb">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download .deb
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Installation notes -->
+  <div class="warnings">
+    <div class="warn-box red">
+      <div class="warn-icon">⚠️</div>
+      <div>
+        <div class="warn-title">Windows — SmartScreen warning</div>
+        <div class="warn-body">
+          Windows may show "Windows protected your PC." Click <strong>More info</strong> → <strong>Run anyway</strong>. This happens because the app is not yet signed with a paid certificate — it is safe to install.
+        </div>
+      </div>
+    </div>
+    <div class="warn-box">
+      <div class="warn-icon">🍎</div>
+      <div>
+        <div class="warn-title">macOS — Gatekeeper warning</div>
+        <div class="warn-body">
+          If macOS blocks the app, open <strong>System Settings → Privacy &amp; Security</strong> and click <strong>Open Anyway</strong>. Or right-click the .dmg and choose <strong>Open</strong>.
+        </div>
+      </div>
+    </div>
+    <div class="warn-box">
+      <div class="warn-icon">🐧</div>
+      <div>
+        <div class="warn-title">Linux — Install via terminal</div>
+        <div class="warn-body">
+          Run <code>sudo dpkg -i LogicLab.deb</code> after downloading. The app will appear in your application launcher.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How to install steps -->
+  <div class="steps-section">
+    <p class="section-label">How to get started</p>
+    <div class="steps-grid">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-text"><strong>Download</strong>Pick the installer for your OS above.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-text"><strong>Install</strong>Run the installer and follow the on-screen steps.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-text"><strong>Launch</strong>Open LogicLab from your desktop or app launcher.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-text"><strong>Auto-update</strong>The app checks for updates every launch — always stay current.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Built with ☕ Java &nbsp;·&nbsp; Backend on <a href="https://railway.app" target="_blank">Railway</a> &nbsp;·&nbsp; <a href="https://github.com/bajanandrei007-source/java-gui-app/releases" target="_blank">View all releases on GitHub</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
