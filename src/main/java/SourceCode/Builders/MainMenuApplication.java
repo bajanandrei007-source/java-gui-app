@@ -157,7 +157,7 @@ public class MainMenuApplication extends JPanel {
         sidebar.add(schoolLabel);
         sidebar.add(Box.createVerticalStrut(s(14)));
 
-        String[] navItems = { "Profile", "Playground", "Settings" };
+        String[] navItems = { "Profile", "Playground" };
         for (String item : navItems) {
             JPanel navItem = makeNavItem(item);
             if (item.equals("Profile")) {

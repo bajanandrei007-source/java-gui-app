@@ -222,7 +222,7 @@ public class ProfileApplication extends JPanel {
         sidebar.add(schoolLabel);
         sidebar.add(Box.createVerticalStrut(14));
 
-        for (String item : new String[]{ "<- Back", "Settings" }) {
+        for (String item : new String[]{ "<- Back" }) {
             JPanel nav = makeNavItem(item);
             if (item.equals("<- Back")) {
                 nav.addMouseListener(new MouseAdapter() {
