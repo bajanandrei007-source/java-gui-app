@@ -7,6 +7,9 @@ import javax.swing.*;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -75,8 +78,8 @@ public class Launcher {
                         remoteConfig.update(UpdateOptions.archive(UPDATE_DIR));
                         
                         // Save the new version.xml so we know we downloaded it
-                        try (OutputStream out = Files.newOutputStream(PENDING_CONFIG)) {
-                            remoteConfig.write(out);
+                        try (java.io.Writer writer = Files.newBufferedWriter(PENDING_CONFIG)) {
+                            remoteConfig.write(writer);
                         }
                         
                         System.out.println("Update downloaded. Will seamlessly apply on next launch.");
