@@ -111,6 +111,15 @@ jobs:
             --vendor "LogicLab" \
             --description "LogicLab - Java Programming Challenges"
 
+      - name: Rename installer to remove version number
+        shell: bash
+        run: |
+          cd installer-output
+          for f in *; do
+            ext="${f##*.}"
+            mv "$f" "LogicLab.$ext" 2>/dev/null || true
+          done
+
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
