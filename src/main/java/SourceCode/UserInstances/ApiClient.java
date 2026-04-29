@@ -9,7 +9,22 @@ import org.json.JSONObject;
 
 public class ApiClient {
     
-    private static final String BASE_URL = "https://leetcode-prototype-api-production.up.railway.app";
+    private static final String BASE_URL;
+
+    static {
+        String url = "https://leetcode-prototype-api-production.up.railway.app"; // fallback
+        try (java.io.InputStream in = ApiClient.class
+                .getResourceAsStream("/config.properties")) {
+            if (in != null) {
+                java.util.Properties props = new java.util.Properties();
+                props.load(in);
+                url = props.getProperty("base.url", url);
+            }
+        } catch (Exception e) {
+            System.err.println("config.properties not found, using default BASE_URL");
+        }
+        BASE_URL = url;
+    }
 
     public static class AuthResult {
         public String token;
