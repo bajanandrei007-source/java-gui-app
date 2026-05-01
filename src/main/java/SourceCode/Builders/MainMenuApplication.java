@@ -125,35 +125,12 @@ public class MainMenuApplication extends JPanel {
         sidebar.setBorder(new MatteBorder(0, 0, 0, 2, BORDER_COLOR));
         sidebar.setPreferredSize(new Dimension(s(130), 0));
 
-        JLabel logoLabel = new JLabel("LC CLN", SwingConstants.CENTER) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                int pad = s(10);
-                g2.setColor(BG_SIDEBAR);
-                g2.fillRect(0, 0, getWidth(), getHeight());
-                g2.setColor(ACCENT_GREEN);
-                g2.setStroke(new BasicStroke(s(3)));
-                g2.drawRect(pad, pad, getWidth() - pad * 2, getHeight() - pad * 2);
-                g2.drawOval(pad + s(6), pad + s(6), getWidth() - pad * 2 - s(12), getHeight() - pad * 2 - s(12));
-                g2.dispose();
-                super.paintComponent(g);
-            }
-        };
-        logoLabel.setFont(PIXEL_SMALL);
-        logoLabel.setForeground(ACCENT_GREEN);
-        logoLabel.setPreferredSize(new Dimension(s(70), s(70)));
-        logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel schoolLabel = new JLabel("OLFU", SwingConstants.CENTER);
-        schoolLabel.setFont(PIXEL_SMALL);
-        schoolLabel.setForeground(ACCENT_GREEN);
+        ImageIcon rawIcon = new ImageIcon(getClass().getResource("/school_logo.png"));
+        Image scaledImg = rawIcon.getImage().getScaledInstance(s(90), s(90), Image.SCALE_SMOOTH);
+        JLabel schoolLabel = new JLabel(new ImageIcon(scaledImg));
         schoolLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         sidebar.add(Box.createVerticalStrut(s(14)));
-        sidebar.add(logoLabel);
-        sidebar.add(Box.createVerticalStrut(s(4)));
         sidebar.add(schoolLabel);
         sidebar.add(Box.createVerticalStrut(s(14)));
 

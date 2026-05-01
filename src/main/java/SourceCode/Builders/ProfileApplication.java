@@ -26,6 +26,12 @@ import javax.swing.border.*;
  */
 public class ProfileApplication extends JPanel {
 
+    private static final double SCALE = Toolkit.getDefaultToolkit().getScreenResolution() / 96.0;
+
+    private static int s(int base) {
+        return (int) Math.round(base * SCALE);
+    }
+
     // ── Colour palette (matches MainMenuApplication) ───────────────
     private static final Color  BG_DARK      = new Color(42,  37,  64),
                                 BG_PANEL     = new Color(30,  27,  48),
@@ -191,24 +197,9 @@ public class ProfileApplication extends JPanel {
         sidebar.setBorder(new MatteBorder(0, 0, 0, 2, BORDER_COLOR));
         sidebar.setPreferredSize(new Dimension(130, 0));
 
-        JLabel logoLabel = new JLabel("LC CLN", SwingConstants.CENTER) {
-            @Override protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                int pad = 10;
-                g2.setColor(BG_SIDEBAR);
-                g2.fillRect(0, 0, getWidth(), getHeight());
-                g2.setColor(ACCENT_GREEN);
-                g2.setStroke(new BasicStroke(3));
-                g2.drawRect(pad, pad, getWidth()-pad*2, getHeight()-pad*2);
-                g2.drawOval(pad+6, pad+6, getWidth()-pad*2-12, getHeight()-pad*2-12);
-                g2.dispose();
-                super.paintComponent(g);
-            }
-        };
-        logoLabel.setFont(PIXEL_SMALL);
-        logoLabel.setForeground(ACCENT_GREEN);
-        logoLabel.setPreferredSize(new Dimension(70, 70));
+        ImageIcon rawIcon = new ImageIcon(getClass().getResource("/school_logo.png"));
+        Image scaledImg = rawIcon.getImage().getScaledInstance(s(90), s(90), Image.SCALE_SMOOTH);
+        JLabel logoLabel = new JLabel(new ImageIcon(scaledImg));
         logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel schoolLabel = new JLabel("OLFU", SwingConstants.CENTER);

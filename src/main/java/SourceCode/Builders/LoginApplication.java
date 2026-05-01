@@ -30,7 +30,7 @@ public class LoginApplication extends JPanel {
     private final JPasswordField passwordPF;
 
     // ── Eye-icon images (loaded from disk; falls back to text emoji) ──
-    private Image     rawShowImg, rawHideImg, rawLoginImg;
+    private Image rawShowImg, rawHideImg, rawLoginImg, rawLogoImg;
     private ImageIcon showIcon,   hideIcon;
     private boolean   isShowing = false;   // tracks whether password is visible
 
@@ -66,11 +66,18 @@ public class LoginApplication extends JPanel {
         panel.setBackground(BG_COLOR);
 
         // ── Logo / title labels ───────────────────────────────────
-        logoLabel = new JLabel("LC CLN", SwingConstants.CENTER);
-        logoLabel.setForeground(TEXT_COLOR);
+        URL logoUrl = getClass().getResource("/LogicLab_Logo.png");
+        if (logoUrl != null) {
+            rawLogoImg = new ImageIcon(logoUrl).getImage();
+            logoLabel = new JLabel(new ImageIcon(rawLogoImg), SwingConstants.CENTER);
+        } else {
+            rawLogoImg = null;
+            logoLabel = new JLabel("LC CLN", SwingConstants.CENTER); // fallback
+            logoLabel.setForeground(TEXT_COLOR);
+        }
         panel.add(logoLabel);
 
-        titleLabel = new JLabel("Sign in to play", SwingConstants.CENTER);
+        titleLabel = new JLabel("Sign in:", SwingConstants.CENTER);
         titleLabel.setForeground(TEXT_COLOR);
         panel.add(titleLabel);
 
@@ -341,13 +348,30 @@ public class LoginApplication extends JPanel {
             fBtn   = Math.max( 9, (int)(11 * scale)),
             fLink  = Math.max( 8, (int)(10 * scale));
 
+        int rowLogo   = (int)(H * 0.05),
+            logoH     = (int)(H * 0.20),  // ← change 0.12 to 0.20 to enlarge
+            titleH    = (int)(H * 0.09),
+            rowUser   = (int)(H * 0.30),
+            rowPass   = (int)(H * 0.44),
+            rowLink   = (int)(H * 0.63),
+            linkH     = Math.max(14, (int)(16 * scale)),
+            rowSignIn = (int)(H * 0.73);
+
         Font logoFont  = new Font("Courier New", Font.BOLD,  fLogo);
         Font titleFont = new Font("Courier New", Font.BOLD,  fTitle);
         Font labelFont = new Font("Courier New", Font.BOLD, fLabel);
         Font btnFont   = new Font("Courier New", Font.PLAIN, fBtn);
         Font linkFont  = new Font("Courier New", Font.PLAIN, fLink);
 
-        logoLabel          .setFont(logoFont);
+        logoLabel.setBounds(0, rowLogo, W, logoH);
+        if (rawLogoImg != null) {
+            int logoImgH = Math.max(60, logoH);
+            logoLabel.setIcon(new ImageIcon(rawLogoImg.getScaledInstance(logoImgH, logoImgH, Image.SCALE_SMOOTH)));
+            logoLabel.setText(null);
+        } else {
+            logoLabel.setFont(logoFont);
+        }
+        
         titleLabel         .setFont(titleFont);
         l1                 .setFont(labelFont);
         l2                 .setFont(labelFont);
@@ -379,22 +403,12 @@ public class LoginApplication extends JPanel {
             labelH  = Math.max(14, (int)(18 * scale)),
             labelGap = Math.max(2, (int)(3 * scale));
 
-        // Row positions (proportional to panel height)
-        int rowLogo   = (int)(H * 0.05),
-            logoH     = (int)(H * 0.12),
-            titleH    = (int)(H * 0.09),
-            rowUser   = (int)(H * 0.30),
-            rowPass   = (int)(H * 0.44),
-            rowLink   = (int)(H * 0.63),
-            linkH     = Math.max(14, (int)(16 * scale)),
-            rowSignIn = (int)(H * 0.73);
-
         // Stretch the inner panel to fill this JPanel
         panel.setBounds(0, 0, W, H);
 
         // Logo + title (centred, stacked)
         logoLabel .setBounds(0, rowLogo,         W, logoH);
-        titleLabel.setBounds(0, rowLogo + logoH, W, titleH);
+        titleLabel.setBounds(0, rowLogo + logoH - 17, W, titleH);
 
         // Username: label above field
         l1        .setBounds(fieldX, rowUser, fieldW, labelH);
