@@ -20,7 +20,7 @@ public class Main extends JFrame {
 
     public Main() {
         setTitle("Main");
-        setSize(s(500), s(500));
+        setSize(s(700), s(600));
         setMinimumSize(new Dimension(s(400), s(400)));
         setResizable(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
