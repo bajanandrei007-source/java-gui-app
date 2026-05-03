@@ -19,7 +19,7 @@ public class Main extends JFrame {
     private final JPanel deck;
 
     public Main() {
-        setTitle("Main");
+        setTitle("Login page");
         setSize(s(700), s(600));
         setMinimumSize(new Dimension(s(400), s(400)));
         setResizable(true);
@@ -30,13 +30,25 @@ public class Main extends JFrame {
 
         // ── Build each card with its navigation callbacks ──────────
         LoginApplication loginPanel = new LoginApplication(
-                () -> cl.show(deck, "mm"), // onLogin → main menu
-                () -> cl.show(deck, "reg") // onRegister → registration
+                () -> {
+                    cl.show(deck, "mm"); // onLogin → main menu
+                    setTitle("Main Menu  page");
+                },
+                () -> {
+                    cl.show(deck, "reg"); // onRegister → registration
+                    setTitle("Registration Page");
+                }
         );
 
         RegistrationApplication regPanel = new RegistrationApplication(
-                () -> cl.show(deck, "mm"), // onSuccess → main menu
-                () -> cl.show(deck, "log") // onBack → login
+                () -> {
+                    cl.show(deck, "mm");  // onSuccess → main menu
+                    setTitle("Main Menu page");
+                },
+                () -> {
+                    cl.show(deck, "log"); // onBack → login
+                    setTitle("Login page");
+                }   
         );
 
         // We use an array reference to break the circular dependency between Profile and MainMenu
@@ -46,12 +58,19 @@ public class Main extends JFrame {
                 () -> {
                     cl.show(deck, "mm");
                     if (mmPanelRef[0] != null) mmPanelRef[0].refreshLeaderboard();
+                    setTitle("Main Menu page");
                 }, // onBack → main menu AND refresh leaderboard
-                () -> cl.show(deck, "log") // onLogin → login (logout/delete)
+                () -> {
+                    cl.show(deck, "log"); // onBack → login(logout/delete acc)
+                    setTitle("Login page");
+                } 
         );
 
         CodeEditorApplication editorPanel = new CodeEditorApplication(
-                () -> cl.show(deck, "mm") // Back → main menu
+                () -> {
+                    cl.show(deck, "mm");  // back → main menu
+                    setTitle("Main Menu page");
+                }
         );
 
         MainMenuApplication mmPanel = new MainMenuApplication(
@@ -115,6 +134,7 @@ public class Main extends JFrame {
                                 pfPanel.refresh();
                                 pfPanel.setRank(finalRank);
                                 cl.show(deck, "pf");
+                                setTitle("Profile page");
                             });
 
                         } catch (Exception ex) {
@@ -122,11 +142,15 @@ public class Main extends JFrame {
                             SwingUtilities.invokeLater(() -> {
                                 pfPanel.refresh();
                                 cl.show(deck, "pf");
+                                setTitle("Profile page");
                             });
                         }
                     }).start();
                 },
-                () -> cl.show(deck, "editor"));
+                () -> {
+                    cl.show(deck, "editor");
+                    setTitle("Playground");
+                });
 
         // Assign the reference so pfPanel can access it later
         mmPanelRef[0] = mmPanel;
