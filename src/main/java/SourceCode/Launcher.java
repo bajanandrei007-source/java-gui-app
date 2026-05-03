@@ -2,14 +2,11 @@ package SourceCode;
 
 import org.update4j.Configuration;
 import org.update4j.UpdateOptions;
+import org.update4j.Archive;
 
 import javax.swing.*;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -30,20 +27,25 @@ public class Launcher {
     private static final Path LOCAL_JAR = LOCAL_DIR.resolve("LogicLab.jar");
     private static final Path LOCAL_CONFIG = LOCAL_DIR.resolve("version.xml");
     
-    private static final Path UPDATE_DIR = LOCAL_DIR.resolve("update");
-    private static final Path PENDING_JAR = UPDATE_DIR.resolve("LogicLab.jar");
-    private static final Path PENDING_CONFIG = UPDATE_DIR.resolve("version.xml");
+    // Using a ZIP archive and a pending config file instead of an update folder
+    private static final Path UPDATE_ZIP = LOCAL_DIR.resolve("update.zip");
+    private static final Path PENDING_CONFIG = LOCAL_DIR.resolve("version.pending.xml");
 
     public static void main(String[] args) {
         // 1. Apply any pending updates (Must do this BEFORE loading any JARs to avoid Windows file locks)
-        if (Files.exists(PENDING_JAR)) {
+        if (Files.exists(UPDATE_ZIP)) {
             try {
                 Files.createDirectories(LOCAL_DIR);
-                Files.move(PENDING_JAR, LOCAL_JAR, StandardCopyOption.REPLACE_EXISTING);
+                
+                // Uses update4j's native installer to safely extract the archive
+                Archive.read(UPDATE_ZIP).install();
+                Files.deleteIfExists(UPDATE_ZIP); // Clean up the archive after install
+                
+                // Update the local config so the application knows it is on the new version
                 if (Files.exists(PENDING_CONFIG)) {
                     Files.move(PENDING_CONFIG, LOCAL_CONFIG, StandardCopyOption.REPLACE_EXISTING);
                 }
-                System.out.println("Applied pending update successfully.");
+                System.out.println("Applied pending update successfully from ZIP.");
             } catch (Exception e) {
                 System.err.println("Failed to apply pending update: " + e.getMessage());
             }
@@ -71,18 +73,18 @@ public class Launcher {
 
                     // Compare timestamps. If local is missing or older, we need an update!
                     if (localConfig == null || !remoteConfig.getTimestamp().equals(localConfig.getTimestamp())) {
-                        System.out.println("Update found! Downloading in background...");
-                        Files.createDirectories(UPDATE_DIR);
+                        System.out.println("Update found! Downloading ZIP in background...");
+                        Files.createDirectories(LOCAL_DIR);
                         
-                        // Download update to the isolated update folder
-                        remoteConfig.update(UpdateOptions.archive(UPDATE_DIR));
+                        // Download update into a single zip archive
+                        remoteConfig.update(UpdateOptions.archive(UPDATE_ZIP));
                         
-                        // Save the new version.xml so we know we downloaded it
+                        // Save the new version.xml as a pending file to be applied on next launch
                         try (java.io.Writer writer = Files.newBufferedWriter(PENDING_CONFIG)) {
                             remoteConfig.write(writer);
                         }
                         
-                        System.out.println("Update downloaded. Will seamlessly apply on next launch.");
+                        System.out.println("Update downloaded to ZIP. Will seamlessly apply on next launch.");
                     } else {
                         System.out.println("You are already on the latest version.");
                     }
