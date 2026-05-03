@@ -62,6 +62,15 @@ public class Launcher {
                      InputStreamReader reader = new InputStreamReader(in)) {
                     
                     Configuration remoteConfig = Configuration.read(reader);
+
+                    System.out.println("Remote timestamp : " + remoteConfig.getTimestamp());
+                    System.out.println("Remote base URI  : " + remoteConfig.getBaseUri());
+                    remoteConfig.getFiles().forEach(f -> {
+                        System.out.println("  File path : " + f.getPath());
+                        System.out.println("  File URI  : " + f.getUri());
+                        System.out.println("  Size      : " + f.getSize());
+                        System.out.println("  Checksum  : " + f.getChecksum());
+                    });
                     
                     // Check local version.xml to see if we already have this version
                     Configuration localConfig = null;
