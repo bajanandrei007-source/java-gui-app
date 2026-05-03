@@ -203,7 +203,7 @@ public class LoginApplication extends JPanel {
         Font linkFont  = new Font("Courier New", Font.PLAIN, fLink);
 
         // Component heights
-        int logoH    = (int)(H * 0.16),
+        int logoH    = (int)(H * 0.25),
             titleH   = Math.max(20, (int)(22 * scale)),
             fieldH   = Math.max(20, (int)(24 * scale)),
             labelH   = Math.max(14, (int)(18 * scale)),
