@@ -61,7 +61,7 @@ jobs:
           - os: windows-latest
             type: exe
             ext: exe
-            icon: src/main/resources/LogicLab_icon.ico
+            icon: src/main/resources/Logo.ico
           - os: macos-latest
             type: dmg
             ext: dmg
