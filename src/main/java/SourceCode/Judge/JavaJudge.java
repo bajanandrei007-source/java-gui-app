@@ -169,7 +169,7 @@ public class JavaJudge {
             {"racecar",  "racecar"},
             {"",         ""},
             {"a",        "a"},
-            {"LeetCode", "edoCsteeL"},
+            {"LeetCode", "edoCteeL"},
             {"12345",    "54321"}
         };
         List<TestCase> tests = new ArrayList<>();
