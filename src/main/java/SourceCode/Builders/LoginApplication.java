@@ -20,7 +20,6 @@ import java.net.URL;
  */
 public class LoginApplication extends JPanel {
 
-    // ── Swing components ──────────────────────────────────────────
     private final JPanel         panel;
     private final JButton        goToMainMenuBtn, toggleButton;
     private final JLabel         logoLabel, titleLabel, l1, l2,
@@ -28,25 +27,18 @@ public class LoginApplication extends JPanel {
     private final JTextField     usernameTF;
     private final JPasswordField passwordPF;
 
-    // ── Eye-icon images ───────────────────────────────────────────
     private Image     rawShowImg, rawHideImg, rawLoginImg, rawLogoImg;
     private ImageIcon showIcon, hideIcon;
     private boolean   isShowing = false;
 
-    // ── Colour palette (purple-slate theme) ───────────────────────
     private static final Color BG_COLOR    = new Color( 74,  65, 107),
                                FIELD_BG   = new Color(200, 198, 220),
                                LABEL_COLOR = new Color(230, 225, 255),
                                TEXT_COLOR  = new Color(245, 242, 255),
                                FIELD_FG   = new Color( 30,  25,  55);
 
-    // ── Base design dimensions ────────────────────────────────────
-    private static final int BASE_W = 400, BASE_H = 340;
-    private static final int TOGGLE_W = 26;
+    private static final int BASE_W = 400, BASE_H = 340, TOGGLE_W = 26;
 
-    // ─────────────────────────────────────────────────────────────
-    // Constructor
-    // ─────────────────────────────────────────────────────────────
     public LoginApplication(Runnable onLogin, Runnable onRegister) {
 
         setLayout(new BorderLayout());
@@ -55,7 +47,6 @@ public class LoginApplication extends JPanel {
         panel = new JPanel(null);
         panel.setBackground(BG_COLOR);
 
-        // ── Logo ──────────────────────────────────────────────────
         URL logoUrl = getClass().getResource("/LogicLab_LogoLabel_White.png");
         if (logoUrl != null) {
             rawLogoImg = new ImageIcon(logoUrl).getImage();
@@ -67,12 +58,10 @@ public class LoginApplication extends JPanel {
         }
         panel.add(logoLabel);
 
-        // ── Title ─────────────────────────────────────────────────
         titleLabel = new JLabel("Sign in:", SwingConstants.CENTER);
         titleLabel.setForeground(TEXT_COLOR);
         panel.add(titleLabel);
 
-        // ── Email field ───────────────────────────────────────────
         l1 = new JLabel("Email:");
         l1.setForeground(LABEL_COLOR);
         panel.add(l1);
@@ -80,7 +69,6 @@ public class LoginApplication extends JPanel {
         usernameTF = new JTextField();
         panel.add(usernameTF);
 
-        // ── Password field ────────────────────────────────────────
         l2 = new JLabel("Password:");
         l2.setForeground(LABEL_COLOR);
         panel.add(l2);
@@ -88,7 +76,6 @@ public class LoginApplication extends JPanel {
         passwordPF = new JPasswordField();
         panel.add(passwordPF);
 
-        // ── Eye-icon toggle ───────────────────────────────────────
         URL showUrl = getClass().getResource("/ShowP.png"),
             hideUrl = getClass().getResource("/HideP.png");
 
@@ -112,7 +99,6 @@ public class LoginApplication extends JPanel {
         toggleButton.addActionListener(e -> togglePassword());
         panel.add(toggleButton);
 
-        // ── Forgot Password link ──────────────────────────────────
         forgotPasswordLabel = new JLabel("Forgot Password?");
         forgotPasswordLabel.setForeground(new Color(176, 196, 255));
         forgotPasswordLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -127,11 +113,9 @@ public class LoginApplication extends JPanel {
         });
         panel.add(forgotPasswordLabel);
 
-        // ── Register link ─────────────────────────────────────────
         registerPromptLabel = buildRegisterLink(onRegister);
         panel.add(registerPromptLabel);
 
-        // ── Login button ──────────────────────────────────────────
         URL loginBtnUrl = getClass().getResource("/Buttons/LoginButton.png");
         rawLoginImg = (loginBtnUrl != null)
                 ? new ImageIcon(loginBtnUrl).getImage()
@@ -155,7 +139,7 @@ public class LoginApplication extends JPanel {
         goToMainMenuBtn.addActionListener(e -> handleLogin(onLogin));
         panel.add(goToMainMenuBtn);
 
-        // Set default button once the panel is visible
+        // Sets 'Login' as a default button once the panel is visible
         addHierarchyListener(e -> {
             if ((e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0 && isShowing()) {
                 JRootPane rp = SwingUtilities.getRootPane(this);
@@ -171,11 +155,7 @@ public class LoginApplication extends JPanel {
             @Override public void componentShown (ComponentEvent e) { layoutComponents(); }
         });
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Layout
-    // ─────────────────────────────────────────────────────────────
-
+    
     private void layoutComponents() {
         layoutComponents(getWidth(), getHeight());
     }
@@ -189,18 +169,17 @@ public class LoginApplication extends JPanel {
 
         double scale = Math.min((double) W / BASE_W, (double) H / BASE_H);
 
-        // Font sizes (clamped to readable minimums)
         int fLogo  = Math.max(11, (int)(15 * scale)),
             fTitle = Math.max(13, (int)(18 * scale)),
             fLabel = Math.max(11, (int)(14 * scale)),
             fBtn   = Math.max( 9, (int)(11 * scale)),
             fLink  = Math.max( 8, (int)(10 * scale));
 
-        Font logoFont  = new Font("Courier New", Font.BOLD,  fLogo);
-        Font titleFont = new Font("Courier New", Font.BOLD,  fTitle);
-        Font labelFont = new Font("Courier New", Font.BOLD,  fLabel);
-        Font btnFont   = new Font("Courier New", Font.PLAIN, fBtn);
-        Font linkFont  = new Font("Courier New", Font.PLAIN, fLink);
+        Font logoFont  = new Font("Courier New", Font.BOLD,  fLogo),
+             titleFont = new Font("Courier New", Font.BOLD,  fTitle),
+             labelFont = new Font("Courier New", Font.BOLD,  fLabel),
+             btnFont   = new Font("Courier New", Font.PLAIN, fBtn),
+             linkFont  = new Font("Courier New", Font.PLAIN, fLink);
 
         // Component heights
         int logoH    = (int)(H * 0.25),
@@ -225,7 +204,6 @@ public class LoginApplication extends JPanel {
         // Sequential Y cursor
         int y = (int)(H * 0.03);
 
-        // ── Logo ──────────────────────────────────────────────────
         logoLabel.setBounds(0, y, W, logoH);
         if (rawLogoImg != null) {
             int origW = rawLogoImg.getWidth(null),
@@ -241,12 +219,10 @@ public class LoginApplication extends JPanel {
         }
         y += logoH + gap;
 
-        // ── Title ─────────────────────────────────────────────────
         titleLabel.setFont(titleFont);
         titleLabel.setBounds(0, y, W, titleH);
         y += titleH + gap;
 
-        // ── Email ─────────────────────────────────────────────────
         l1.setFont(labelFont);
         l1.setBounds(fieldX, y, fieldW, labelH);
         y += labelH + smallGap;
@@ -256,12 +232,10 @@ public class LoginApplication extends JPanel {
         usernameTF.setBounds(fieldX, y, fieldW, fieldH);
         y += fieldH + smallGap;
 
-        // ── Register link ─────────────────────────────────────────
         registerPromptLabel.setFont(linkFont);
         registerPromptLabel.setBounds(0, y, W, linkH);
         y += linkH + smallGap;
 
-        // ── Password ──────────────────────────────────────────────
         l2.setFont(labelFont);
         l2.setBounds(fieldX, y, fieldW, labelH);
         y += labelH + smallGap;
@@ -279,13 +253,11 @@ public class LoginApplication extends JPanel {
         }
         y += fieldH + smallGap;
 
-        // ── Forgot Password ───────────────────────────────────────
         forgotPasswordLabel.setFont(linkFont);
         forgotPasswordLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         forgotPasswordLabel.setBounds(fieldX, y, fieldW, linkH);
         y += linkH + gap;
 
-        // ── Login button ──────────────────────────────────────────
         goToMainMenuBtn.setFont(btnFont);
         int btnW;
         if (rawLoginImg != null) {
@@ -306,10 +278,6 @@ public class LoginApplication extends JPanel {
         panel.revalidate();
         panel.repaint();
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Forgot Password flow
-    // ─────────────────────────────────────────────────────────────
 
     private void handleForgotPassword() {
         String email = JOptionPane.showInputDialog(this,
@@ -397,10 +365,6 @@ public class LoginApplication extends JPanel {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Login flow
-    // ─────────────────────────────────────────────────────────────
-
     private void handleLogin(Runnable onLogin) {
         String email = usernameTF.getText().trim();
         if (email.isEmpty()) {
@@ -438,20 +402,13 @@ public class LoginApplication extends JPanel {
         }).start();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Toggle password visibility
-    // ─────────────────────────────────────────────────────────────
-
+    // toggle password visibility
     private void togglePassword() {
         isShowing = !isShowing;
         passwordPF.setEchoChar(isShowing ? (char) 0 : '•');
         if (showIcon != null && hideIcon != null)
             toggleButton.setIcon(isShowing ? hideIcon : showIcon);
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Helpers
-    // ─────────────────────────────────────────────────────────────
 
     private JLabel buildRegisterLink(Runnable onRegister) {
         JLabel lbl = new JLabel(
