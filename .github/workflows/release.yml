@@ -166,3 +166,12 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create the release (if it doesn't exist)
+          gh release create v1.1.5 --title "Release v1.1.5" --generate-notes || echo "Release already exists"
+          
+          # Upload files one by one, overwriting any existing ones
+          for file in release-files/*; do
+            echo "Uploading $file..."
+            gh release upload v1.1.5 "$file" --clobber
+          done
