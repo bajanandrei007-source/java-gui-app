@@ -8,7 +8,6 @@ import javax.swing.border.*;
 
 /**
  * ProfileApplication — view/edit the current player's profile.
- * Now a JPanel card for Main's CardLayout deck.
  *
  * Displays:
  *  - Username (editable via "Edit" button → inline text field → "Save")
@@ -21,8 +20,6 @@ import javax.swing.border.*;
  *  - READ    — this screen reads live data from PlayerSession on open.
  *  - UPDATE  — the "Edit" button lets the player rename themselves in-memory.
  *  - DELETE  — "Delete Account" resets the session and returns to login.
- *
- * Navigation is handled via Runnable callbacks supplied by Main.
  */
 public class ProfileApplication extends JPanel {
 
@@ -32,7 +29,6 @@ public class ProfileApplication extends JPanel {
         return (int) Math.round(base * SCALE);
     }
 
-    // ── Colour palette (matches MainMenuApplication) ───────────────
     private static final Color  BG_DARK      = new Color(42,  37,  64),
                                 BG_PANEL     = new Color(30,  27,  48),
                                 BG_SIDEBAR   = new Color(26,  23,  40),
@@ -47,34 +43,20 @@ public class ProfileApplication extends JPanel {
                                 PIXEL_SMALL  = new Font("Courier New", Font.BOLD,  11),
                                 PIXEL_LARGE  = new Font("Courier New", Font.BOLD, 15);
 
-    // ── Challenge totals (must match the challenge apps) ──────────
-    private static final int TOTAL_EASY   = 5;
-    private static final int TOTAL_MEDIUM = 3;
-    private static final int TOTAL_HARD   = 3;
-    private static final int TOTAL_ALL    = TOTAL_EASY + TOTAL_MEDIUM + TOTAL_HARD;
+    private static final int TOTAL_EASY   = 5,
+    						 TOTAL_MEDIUM = 3,
+    						 TOTAL_HARD   = 3,
+    						 TOTAL_ALL    = TOTAL_EASY + TOTAL_MEDIUM + TOTAL_HARD;
 
-    // ── Navigation callbacks ──────────────────────────────────────
-    private final Runnable onBack;    // Main shows "mm" card
-    private final Runnable onLogin;   // Main shows "log" card (after logout/delete)
+    private final Runnable onBack, onLogin;
 
     /**
      * Live-updating stat labels held as instance fields so that
      * {@link #refresh()} can push new values without rebuilding the panel.
-     *
-     * Bug fix: previously all stats were read once inside buildProfilePanel()
-     * at construction time.  Because Main creates ProfileApplication before
-     * any login occurs the initial read always returned "Guest" / 0 pts, and
-     * subsequent challenge completions were never reflected because the panel
-     * was never rebuilt.
      */
-    private JLabel liveUsername;
-    private JLabel liveRank;
-    private JLabel livePoints;
-    private JLabel liveTotalSolved;
-    private JLabel liveEasy;
-    private JLabel liveMedium;
-    private JLabel liveHard;
-    private JLabel liveProgressRight;
+    private JLabel liveUsername, liveRank, livePoints,
+				   liveTotalSolved, liveEasy, liveMedium,
+				   liveHard, liveProgressRight;
     private JPanel liveBarBg;
     private double liveProgress = 0.0;
     private final Image rawDeleteImg, rawLogoutImg;
@@ -83,20 +65,10 @@ public class ProfileApplication extends JPanel {
     /** Cached rank string pushed in by the API caller via {@link #setRank(String)}. */
     private String cachedRank = "Unranked";
 
-    // ── Constructor ───────────────────────────────────────────────
-    /**
-     * Builds the profile panel.
-     *
-     * @param onBack   Runnable called when "← Back" is clicked
-     *                 (Main switches to the "mm" card).
-     * @param onLogin  Runnable called after logout or account deletion
-     *                 (Main switches to the "log" card).
-     */
     public ProfileApplication(Runnable onBack, Runnable onLogin) {
         this.onBack  = onBack;
         this.onLogin = onLogin;
 
-        // FIX — replace JFrame-specific setup with JPanel equivalents
         setLayout(new BorderLayout());
         setBackground(BG_DARK);
 
@@ -107,26 +79,9 @@ public class ProfileApplication extends JPanel {
         add(buildProfilePanel(), BorderLayout.CENTER);
     }
 
-    // ── Visibility hook — refresh every time the card is shown ────
-    /**
-     * Called by Swing whenever this panel is added to a visible container
-     * (i.e. every time CardLayout switches to this card).
-     *
-     * Bug fix: without this override the profile displayed stale data from
-     * the moment the panel was first constructed, so username and stats would
-     * never update after login or after completing a challenge.
-     */
-	 /*
-
     /**
      * Reads the latest values from {@link PlayerSession} and pushes them
-     * into every live-stat label on screen.  Safe to call at any time from
-     * the Event Dispatch Thread.
-     *
-     * This is the primary fix for the reported bug where:
-     *  - Username reverted to "Guest" after returning to the profile screen.
-     *  - Points, solved counts, and progress bar stayed at 0 after completing
-     *    a challenge.
+     * into every live-stat label on screen.
      */
     public void refresh() {
 		
@@ -138,7 +93,6 @@ public class ProfileApplication extends JPanel {
 		System.out.println("Session Username:  " + session.getUsername());
 		System.out.println("Session Points:    " + session.getPoints());
 		
-        //PlayerSession session   = PlayerSession.getInstance();
         int    pts         = session.getPoints();
         int    easySolved  = session.solvedCount("EASY");
         int    medSolved   = session.solvedCount("MEDIUM");
@@ -189,7 +143,6 @@ public class ProfileApplication extends JPanel {
         if (liveRank != null) liveRank.setText(this.cachedRank);
     }
 
-    // ── Sidebar ───────────────────────────────────────────────────
     private JPanel buildSidebar() {
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
@@ -218,7 +171,6 @@ public class ProfileApplication extends JPanel {
             if (item.equals("<- Back")) {
                 nav.addMouseListener(new MouseAdapter() {
                     @Override public void mouseClicked(MouseEvent e) {
-                        // FIX — use callback instead of new MainMenuApplication(this) + dispose()
                         onBack.run();
                     }
                 });
@@ -257,15 +209,7 @@ public class ProfileApplication extends JPanel {
         });
         return item;
     }
-
-    // ── Profile content panel ─────────────────────────────────────
-    /**
-     * Builds the profile card panel and wires up every stat label to the
-     * live-label instance fields so {@link #refresh()} can update them later.
-     *
-     * Bug fix: previously local variables were used for all stat values,
-     * making it impossible to update them without rebuilding the entire panel.
-     */
+	
     private JPanel buildProfilePanel() {
         PlayerSession session  = PlayerSession.getInstance();
         int    pts         = session.getPoints();
@@ -287,14 +231,13 @@ public class ProfileApplication extends JPanel {
             new LineBorder(BORDER_COLOR, 2),
             new EmptyBorder(24, 38, 24, 38)
         ));
+		
         card.setPreferredSize(new Dimension(500, 480));
-
         card.add(centeredLabel("PLAYER PROFILE", PIXEL_LARGE, ACCENT_GREEN));
         card.add(Box.createVerticalStrut(3));
         card.add(centeredLabel("─────────────────────────", PIXEL_SMALL, BORDER_COLOR));
         card.add(Box.createVerticalStrut(10));
 
-        // ── Username row with Edit button ─────────────────────────
         JPanel usernameRow = new JPanel(new BorderLayout());
         usernameRow.setOpaque(false);
         usernameRow.setMaximumSize(new Dimension(420, 30));
@@ -308,7 +251,6 @@ public class ProfileApplication extends JPanel {
         JLabel    uVal  = new JLabel(username);
         uVal.setFont(PIXEL_FONT);
         uVal.setForeground(TEXT_PRIMARY);
-        // Assign to live field so refresh() can update the displayed username
         liveUsername = uVal;
 
         JTextField uEdit = new JTextField(username);
@@ -358,7 +300,6 @@ public class ProfileApplication extends JPanel {
                     return;
                 }
 
-                // If the name didn't change, just close the editor
                 if (newName.equals(session.getUsername())) {
                     cardLayout.show(uCenter, "VIEW");
                     editBtn.setText("Edit");
@@ -462,7 +403,6 @@ public class ProfileApplication extends JPanel {
         card.add(buildProgressBar(totalSolved, TOTAL_ALL));
         card.add(Box.createVerticalStrut(18));
 
-        // ── Delete Account button (image-based) ───────────────────
         int delImgW = rawDeleteImg.getWidth(null), delImgH = rawDeleteImg.getHeight(null);
         int delH = 28;
         int delW = (delImgW > 0 && delImgH > 0) ? (int)(delH * ((double) delImgW / delImgH)) : 100;
@@ -489,12 +429,10 @@ public class ProfileApplication extends JPanel {
                 "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
             if (confirm == JOptionPane.YES_OPTION) {
                 PlayerSession.getInstance().reset();
-                // FIX — use callback instead of new LoginApplication(this) + dispose()
                 onLogin.run();
             }
         });
 
-        // ── Log out button (image-based) ───────────────────────
         int logImgW = rawLogoutImg.getWidth(null), logImgH = rawLogoutImg.getHeight(null);
         int logH = 28;
         int logW = (logImgW > 0 && logImgH > 0) ? (int)(logH * ((double) logImgW / logImgH)) : 80;
@@ -514,8 +452,6 @@ public class ProfileApplication extends JPanel {
                 logoutBtn.setBorderPainted(false);
             }
         });
-
-        // FIX — use callback instead of new LoginApplication(this) + dispose()
         logoutBtn.addActionListener(e -> onLogin.run());
 
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -533,11 +469,6 @@ public class ProfileApplication extends JPanel {
      * Builds the progress-bar widget and wires it to the live instance fields
      * {@code liveProgressRight} and {@code liveBarBg} so that {@link #refresh()}
      * can update the label text and repaint the fill without rebuilding the panel.
-     *
-     * Bug fix: the previous version captured {@code progress}, {@code done}, and
-     * {@code total} as local variables inside a lambda/anonymous class.  Those
-     * values were frozen at construction time and could never change, so the bar
-     * always showed 0 % after the panel was first built before login.
      *
      * @param done   challenges solved at construction time (initial paint)
      * @param total  total challenges available
