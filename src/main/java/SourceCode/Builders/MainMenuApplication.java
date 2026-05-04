@@ -13,9 +13,6 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 /**
- * MainMenuApplication — the central hub, now a JPanel card for Main's
- * CardLayout deck.
- *
  * Layout (BorderLayout):
  *   WEST   — sidebar with navigation icons (Profile / Playground links).
  *   CENTER — difficulty selector tabs + scrollable challenge list.
@@ -33,18 +30,16 @@ import javax.swing.border.*;
  */
 public class MainMenuApplication extends JPanel {
 
-    // ── Base design dimensions (matches LoginApplication) ─────────────
     private static final int BASE_W = 400, BASE_H = 340;
 
     // ── Live scale — updated on every resize, read everywhere ─────────
     private double liveScale = 1.0;
 
-    /** Scale a base pixel value by the current live scale factor. */
+    // Scale a base pixel value by the current live scale factor.
     private int sc(int base) {
         return Math.max(1, (int) Math.round(base * liveScale));
     }
 
-    // ── Colour palette (dark pixel-art theme) ─────────────────────────
     private static final Color BG_DARK      = new Color( 42,  37,  64),
                                BG_PANEL     = new Color( 30,  27,  48),
                                BG_SIDEBAR   = new Color( 26,  23,  40),
@@ -56,7 +51,6 @@ public class MainMenuApplication extends JPanel {
                                TEXT_MUTED   = new Color(138, 133, 170),
                                BORDER_COLOR = new Color( 74,  69, 112);
 
-    // ── Challenge difficulty metadata ──────────────────────────────────
     private enum Difficulty {
         EASY("EASY", ACCENT_GREEN, new String[]{
                 "1 · Print Hello World",
@@ -85,30 +79,18 @@ public class MainMenuApplication extends JPanel {
         }
     }
 
-    // ── State ──────────────────────────────────────────────────────────
     private Difficulty            currentDifficulty = null;
     private DefaultListModel<String> listModel;
     private JList<String>         challengeList;
     private JButton[]             diffButtons;
-    private JLabel                difficultyHeader;
-    private JPanel                leaderboardPanel;
-
-    // ── Scaleable component references ─────────────────────────────────
-    private JPanel                sidebar;
-    private JLabel                schoolLabel;
+    private JPanel                leaderboardPanel, leaderboardList, sidebar;
+    private JLabel                schoolLabel, leaderboardHeader, difficultyHeader, challengeHint;
     private Image                 rawSchoolImg;
-    private final List<JPanel>    navItemPanels = new ArrayList<>();
-    private final List<JLabel>    navItemLabels = new ArrayList<>();
-    private JLabel                leaderboardHeader;
-    private JPanel                leaderboardList;
-    private JLabel                challengeHint;
+    private final List<JPanel>    navItemPanels = new ArrayList<>(),
+                                  navItemLabels = new ArrayList<>();
 
-    // ── Navigation callbacks ───────────────────────────────────────────
     private final Runnable onProfile, onPlayground;
 
-    // ─────────────────────────────────────────────────────────────────
-    // Constructor
-    // ─────────────────────────────────────────────────────────────────
     public MainMenuApplication(Runnable onProfile, Runnable onPlayground) {
         this.onProfile    = onProfile;
         this.onPlayground = onPlayground;
@@ -126,16 +108,12 @@ public class MainMenuApplication extends JPanel {
 
         refreshLeaderboard();
 
-        // ── Live resize listener — mirrors LoginApplication ────────
         addComponentListener(new ComponentAdapter() {
             @Override public void componentResized(ComponentEvent e) { layoutComponents(); }
             @Override public void componentShown  (ComponentEvent e) { layoutComponents(); }
         });
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // Live layout — called on every resize, exactly like Login
-    // ─────────────────────────────────────────────────────────────────
     private void layoutComponents() {
         int W = getWidth(), H = getHeight();
         if (W <= 0 || H <= 0) return;
@@ -143,7 +121,6 @@ public class MainMenuApplication extends JPanel {
         // Compute uniform scale — same formula as LoginApplication
         liveScale = Math.min((double) W / BASE_W, (double) H / BASE_H);
 
-        // ── Sidebar ───────────────────────────────────────────────
         int sideW = (int)(W * 0.14);          // 14 % of total width
         sidebar.setPreferredSize(new Dimension(sideW, 0));
 
@@ -166,7 +143,6 @@ public class MainMenuApplication extends JPanel {
             nl.setBorder(new EmptyBorder(0, sc(7), 0, 0));
         }
 
-        // ── Leaderboard (EAST) ────────────────────────────────────
         int lbW = (int)(W * 0.18);            // 18 % of total width
         leaderboardPanel.setPreferredSize(new Dimension(lbW, 0));
 
@@ -195,7 +171,6 @@ public class MainMenuApplication extends JPanel {
             }
         }
 
-        // ── Difficulty tab buttons ────────────────────────────────
         Font diffFont   = new Font("Courier New", Font.BOLD, Math.max(11, sc(10)));
         int  diffPadV   = Math.max(6,  sc(6));
         int  diffPadH   = Math.max(2,  sc(2));
@@ -206,20 +181,17 @@ public class MainMenuApplication extends JPanel {
                     new EmptyBorder(diffPadV, diffPadH, diffPadV, diffPadH)));
         }
 
-        // ── Difficulty header label ───────────────────────────────
         difficultyHeader.setFont(
                 new Font("Courier New", Font.BOLD, Math.max(8, sc(6))));
         difficultyHeader.setBorder(new CompoundBorder(
                 new MatteBorder(0, 0, sc(1), 0, BORDER_COLOR),
                 new EmptyBorder(sc(4), sc(7), sc(4), sc(7))));
 
-        // ── Challenge list ────────────────────────────────────────
         Font listFont = new Font("Courier New", Font.BOLD, Math.max(11, sc(10)));
         challengeList.setFont(listFont);
         challengeList.setFixedCellHeight(Math.max(22, sc(20)));
         challengeList.setBorder(new EmptyBorder(sc(2), 0, sc(2), 0));
 
-        // ── Challenge hint footer ─────────────────────────────────
         if (challengeHint != null) {
             challengeHint.setFont(
                     new Font("Courier New", Font.BOLD, Math.max(7, sc(6))));
@@ -232,9 +204,6 @@ public class MainMenuApplication extends JPanel {
         repaint();
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // Sidebar
-    // ─────────────────────────────────────────────────────────────────
     private JPanel buildSidebar() {
         sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
@@ -276,16 +245,11 @@ public class MainMenuApplication extends JPanel {
         sidebar.add(Box.createVerticalGlue());
         return sidebar;
     }
-
-    /**
-     * Creates a single sidebar navigation row with hover highlighting.
-     * The panel and label are stored in navItemPanels / navItemLabels
-     * so layoutComponents() can rescale them on every resize.
-     */
+    
     private JPanel makeNavItem(String text) {
         JPanel item = new JPanel(new BorderLayout());
         item.setBackground(BG_SIDEBAR);
-        item.setMaximumSize(new Dimension(130, 28));  // overwritten on resize
+        item.setMaximumSize(new Dimension(130, 28));
         item.setPreferredSize(new Dimension(130, 28));
         item.setBorder(new MatteBorder(0, 3, 0, 0, BG_SIDEBAR));
 
@@ -315,9 +279,6 @@ public class MainMenuApplication extends JPanel {
         return item;
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // Centre panel
-    // ─────────────────────────────────────────────────────────────────
     private JPanel buildCenter() {
         JPanel center = new JPanel(new BorderLayout());
         center.setBackground(BG_DARK);
@@ -326,7 +287,6 @@ public class MainMenuApplication extends JPanel {
         return center;
     }
 
-    // ── Difficulty tab bar ────────────────────────────────────────────
     private JPanel buildDifficultyRow() {
         JPanel row = new JPanel(new GridLayout(1, 3, 0, 0));
         row.setBackground(BG_PANEL);
@@ -366,7 +326,6 @@ public class MainMenuApplication extends JPanel {
         return btn;
     }
 
-    // ── Challenge list card ───────────────────────────────────────────
     private JPanel buildChallengeCard() {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(BG_PANEL);
@@ -435,9 +394,6 @@ public class MainMenuApplication extends JPanel {
         return card;
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // Leaderboard panel
-    // ─────────────────────────────────────────────────────────────────
     private JPanel buildLeaderboard(List<PlayerSession.LeaderboardEntry> entries) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BG_SIDEBAR);
@@ -545,9 +501,6 @@ public class MainMenuApplication extends JPanel {
         }).start();
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // Difficulty selection
-    // ─────────────────────────────────────────────────────────────────
     private void selectDifficulty(Difficulty d) {
         currentDifficulty = d;
         difficultyHeader.setText("  " + d.label + " CHALLENGES");
@@ -558,14 +511,6 @@ public class MainMenuApplication extends JPanel {
         challengeList.repaint();
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // Challenge launcher
-    // ─────────────────────────────────────────────────────────────────
-    /**
-     * Opens the ChallengeConstructor screen for the selected challenge.
-     * The Main Menu window is hidden while the challenge is open, and
-     * restored automatically when the challenge window closes.
-     */
     private void openChallenge(Difficulty difficulty, int index) {
         JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (parentFrame != null) parentFrame.setVisible(false);
