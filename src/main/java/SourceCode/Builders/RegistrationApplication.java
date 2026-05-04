@@ -21,7 +21,6 @@ import java.net.URL;
  */
 public class RegistrationApplication extends JPanel {
 
-    // ── Swing components ──────────────────────────────────────────
     private final JPanel         panel;
     private final JButton        submitButton, backButton,
                                  toggleBtn1,  toggleBtn2;
@@ -31,36 +30,26 @@ public class RegistrationApplication extends JPanel {
     private final JTextField     usernameTF, emailTF;
     private final JPasswordField passwordPF, confirmPasswordPF;
 
-    // ── Eye-icon images ───────────────────────────────────────────
     private Image     rawLogoImg, rawSignUpImg, rawBackImg,
                       rawShowImg, rawHideImg;
     private ImageIcon showIcon, hideIcon;
     private boolean   isShowingPass    = false,
                       isShowingConfirm = false;
 
-    // ── Colour palette (matches LoginApplication) ─────────────────
     private static final Color BG_COLOR    = new Color( 74,  65, 107),
                                FIELD_BG   = new Color(200, 198, 220),
                                LABEL_COLOR = new Color(230, 225, 255),
                                TEXT_COLOR  = new Color(245, 242, 255),
                                FIELD_FG   = new Color( 30,  25,  55);
 
-    // ── Base design dimensions ────────────────────────────────────
-    // Taller than LoginApplication to accommodate 4 fields.
-    private static final int BASE_W = 400, BASE_H = 480;
-    private static final int TOGGLE_W = 26;
+    private static final int BASE_W = 400, BASE_H = 480, TOGGLE_W = 26;
 
-    // ─────────────────────────────────────────────────────────────
-    // Constructor
-    // ─────────────────────────────────────────────────────────────
     public RegistrationApplication(Runnable onSuccess, Runnable onBack) {
         setLayout(new BorderLayout());
 
-        // Background panel (null layout — positions set manually)
         panel = new JPanel(null);
         panel.setBackground(BG_COLOR);
 
-        // ── Logo (same image resource as LoginApplication) ────────
         URL logoUrl = getClass().getResource("/LogicLab_LogoLabel_White.png");
         if (logoUrl != null) {
             rawLogoImg = new ImageIcon(logoUrl).getImage();
@@ -72,40 +61,34 @@ public class RegistrationApplication extends JPanel {
         }
         panel.add(logoLabel);
 
-        // ── Title ─────────────────────────────────────────────────
         titleLabel = new JLabel("Create an Account:", SwingConstants.CENTER);
         titleLabel.setForeground(TEXT_COLOR);
         panel.add(titleLabel);
 
-        // ── Username ──────────────────────────────────────────────
         usernameLabel = makeLabel("Username:");
         panel.add(usernameLabel);
 
         usernameTF = new JTextField();
         panel.add(usernameTF);
 
-        // ── Email ─────────────────────────────────────────────────
         emailLabel = makeLabel("Email:");
         panel.add(emailLabel);
 
         emailTF = new JTextField();
         panel.add(emailTF);
 
-        // ── Password ──────────────────────────────────────────────
         passwordLabel = makeLabel("Password:");
         panel.add(passwordLabel);
 
         passwordPF = new JPasswordField();
         panel.add(passwordPF);
 
-        // ── Confirm Password ──────────────────────────────────────
         confirmPasswordLabel = makeLabel("Confirm Password:");
         panel.add(confirmPasswordLabel);
 
         confirmPasswordPF = new JPasswordField();
         panel.add(confirmPasswordPF);
 
-        // ── Eye-icon toggles (one per password field) ─────────────
         URL showUrl = getClass().getResource("/ShowP.png"),
             hideUrl = getClass().getResource("/HideP.png");
 
@@ -137,7 +120,6 @@ public class RegistrationApplication extends JPanel {
         panel.add(toggleBtn1);
         panel.add(toggleBtn2);
 
-        // ── Sign-Up button ────────────────────────────────────────
         URL signUpUrl = getClass().getResource("/Buttons/SignUpButton.png");
         rawSignUpImg  = (signUpUrl != null)
                 ? new ImageIcon(signUpUrl).getImage()
@@ -161,7 +143,6 @@ public class RegistrationApplication extends JPanel {
         submitButton.addActionListener(e -> handleSignUp(onSuccess));
         panel.add(submitButton);
 
-        // ── Back button ───────────────────────────────────────────
         URL backUrl = getClass().getResource("/Buttons/BackButton.png");
         rawBackImg   = (backUrl != null)
                 ? new ImageIcon(backUrl).getImage()
@@ -195,16 +176,11 @@ public class RegistrationApplication extends JPanel {
 
         add(panel, BorderLayout.CENTER);
 
-        // Re-layout on resize or show
         addComponentListener(new ComponentAdapter() {
             @Override public void componentResized(ComponentEvent e) { layoutComponents(); }
             @Override public void componentShown (ComponentEvent e) { layoutComponents(); }
         });
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Layout
-    // ─────────────────────────────────────────────────────────────
 
     private void layoutComponents() {
         layoutComponents(getWidth(), getHeight());
@@ -218,10 +194,8 @@ public class RegistrationApplication extends JPanel {
     private void layoutComponents(int W, int H) {
         if (W <= 0 || H <= 0) return;
 
-        // Single unified scale factor (same formula as LoginApplication)
         double scale = Math.min((double) W / BASE_W, (double) H / BASE_H);
 
-        // ── Font sizes (clamped to readable minimums) ─────────────
         int fLogo  = Math.max(11, (int)(15 * scale)),
             fTitle = Math.max(13, (int)(18 * scale)),
             fLabel = Math.max(11, (int)(14 * scale)),
@@ -232,7 +206,6 @@ public class RegistrationApplication extends JPanel {
         Font labelFont = new Font("Courier New", Font.BOLD,  fLabel);
         Font btnFont   = new Font("Courier New", Font.PLAIN, fBtn);
 
-        // ── Component heights ─────────────────────────────────────
         int logoH    = (int)(H * 0.25),
             titleH   = Math.max(20, (int)(22 * scale)),
             fieldH   = Math.max(20, (int)(24 * scale)),
@@ -241,7 +214,6 @@ public class RegistrationApplication extends JPanel {
             gap      = Math.max(4,  (int)( 8 * scale)),
             smallGap = Math.max(2,  (int)( 2 * scale));
 
-        // ── Column geometry ───────────────────────────────────────
         int marginX = (int)(W * 0.15),
             toggleW = (int)(TOGGLE_W * scale),
             fieldW  = W - marginX * 2 - toggleW - Math.max(4, (int)(6 * scale)),
@@ -251,10 +223,9 @@ public class RegistrationApplication extends JPanel {
         // Stretch inner panel to fill
         panel.setBounds(0, 0, W, H);
 
-        // ── Sequential Y cursor ───────────────────────────────────
+        // Sequential Y cursor
         int y = (int)(H * 0.03);
 
-        // ── Logo ──────────────────────────────────────────────────
         logoLabel.setBounds(0, y, W, logoH);
         if (rawLogoImg != null) {
             int origW = rawLogoImg.getWidth(null),
@@ -270,12 +241,10 @@ public class RegistrationApplication extends JPanel {
         }
         y += logoH + gap;
 
-        // ── Title ─────────────────────────────────────────────────
         titleLabel.setFont(titleFont);
         titleLabel.setBounds(0, y, W, titleH);
         y += titleH + gap;
 
-        // ── Username ──────────────────────────────────────────────
         usernameLabel.setFont(labelFont);
         usernameLabel.setBounds(fieldX, y, fieldW, labelH);
         y += labelH + smallGap;
@@ -285,7 +254,6 @@ public class RegistrationApplication extends JPanel {
         usernameTF.setBounds(fieldX, y, fieldW, fieldH);
         y += fieldH + gap;
 
-        // ── Email ─────────────────────────────────────────────────
         emailLabel.setFont(labelFont);
         emailLabel.setBounds(fieldX, y, fieldW, labelH);
         y += labelH + smallGap;
@@ -295,7 +263,6 @@ public class RegistrationApplication extends JPanel {
         emailTF.setBounds(fieldX, y, fieldW, fieldH);
         y += fieldH + gap;
 
-        // ── Password ──────────────────────────────────────────────
         passwordLabel.setFont(labelFont);
         passwordLabel.setBounds(fieldX, y, fieldW, labelH);
         y += labelH + smallGap;
@@ -305,7 +272,6 @@ public class RegistrationApplication extends JPanel {
         passwordPF.setBounds(fieldX, y, fieldW, fieldH);
         toggleBtn1.setBounds(toggleX, y, toggleW, fieldH);
 
-        // Scale eye icons alongside the field
         if (rawShowImg != null && rawHideImg != null) {
             int sz = Math.max(12, (int)(18 * scale));
             showIcon = new ImageIcon(rawShowImg.getScaledInstance(sz, sz, Image.SCALE_SMOOTH));
@@ -315,7 +281,6 @@ public class RegistrationApplication extends JPanel {
         }
         y += fieldH + gap;
 
-        // ── Confirm Password ──────────────────────────────────────
         confirmPasswordLabel.setFont(labelFont);
         confirmPasswordLabel.setBounds(fieldX, y, fieldW, labelH);
         y += labelH + smallGap;
@@ -326,7 +291,6 @@ public class RegistrationApplication extends JPanel {
         toggleBtn2.setBounds(toggleX, y, toggleW, fieldH);
         y += fieldH + gap;
 
-        // ── Sign-Up button (right-aligned to field edge) ──────────
         submitButton.setFont(btnFont);
         int btnW;
         if (rawSignUpImg != null) {
@@ -344,7 +308,6 @@ public class RegistrationApplication extends JPanel {
         int btnX = fieldX + fieldW - btnW;
         submitButton.setBounds(btnX, y, btnW, btnH);
 
-        // ── Back button (top-right corner) ────────────────────────
         int backH = Math.max(18, (int)(28 * scale));
         int backW;
         if (rawBackImg != null) {
@@ -369,10 +332,6 @@ public class RegistrationApplication extends JPanel {
         panel.repaint();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Toggle password visibility
-    // ─────────────────────────────────────────────────────────────
-
     private void togglePassword(int field) {
         if (field == 1) {
             isShowingPass = !isShowingPass;
@@ -386,10 +345,6 @@ public class RegistrationApplication extends JPanel {
                 toggleBtn2.setIcon(isShowingConfirm ? hideIcon : showIcon);
         }
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Sign-up flow
-    // ─────────────────────────────────────────────────────────────
 
     private void handleSignUp(Runnable onSuccess) {
         String username     = usernameTF.getText().trim();
@@ -488,10 +443,6 @@ public class RegistrationApplication extends JPanel {
             JOptionPane.showMessageDialog(null, finalMsg, "Error", JOptionPane.ERROR_MESSAGE);
         });
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Helpers
-    // ─────────────────────────────────────────────────────────────
 
     private JLabel makeLabel(String text) {
         JLabel lbl = new JLabel(text);
