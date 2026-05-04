@@ -352,45 +352,49 @@ public class LoginApplication extends JPanel {
     }
 
     private void promptForNewPassword(String email, String otp, ApiClient api) {
-        JPasswordField pf1 = new JPasswordField();
-        JPasswordField pf2 = new JPasswordField();
-        int option = JOptionPane.showConfirmDialog(this,
-                new Object[]{"New Password:", pf1, "Confirm New Password:", pf2},
-                "Reset Password", JOptionPane.OK_CANCEL_OPTION);
+        while (true) {
+            JPasswordField pf1 = new JPasswordField();
+            JPasswordField pf2 = new JPasswordField();
+            int option = JOptionPane.showConfirmDialog(this,
+                    new Object[]{"New Password:", pf1, "Confirm New Password:", pf2},
+                    "Reset Password", JOptionPane.OK_CANCEL_OPTION);
+            if (option != JOptionPane.OK_OPTION) return;
 
-        if (option != JOptionPane.OK_OPTION) return;
+            String pass1 = new String(pf1.getPassword());
+            String pass2 = new String(pf2.getPassword());
 
-        String pass1 = new String(pf1.getPassword());
-        String pass2 = new String(pf2.getPassword());
-
-        if (pass1.isEmpty() || pass1.length() < 8 || !pass1.matches(".*[^a-zA-Z0-9].*")) {
-            JOptionPane.showMessageDialog(this,
-                    "Password must be at least 8 characters and contain 1 special character.",
-                    "Error", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        if (!pass1.equals(pass2)) {
-            JOptionPane.showMessageDialog(this,
-                    "Passwords do not match.", "Error", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        String hashed = SourceCode.UserInstances.PasswordUtil.hashPassword(pf1.getPassword());
-
-        new Thread(() -> {
-            try {
-                api.resetPassword(email, otp, hashed);
-                SwingUtilities.invokeLater(() -> {
-                    setCursor(Cursor.getDefaultCursor());
-                    JOptionPane.showMessageDialog(this,
-                            "Password reset successfully! You can now log in.",
-                            "Success", JOptionPane.INFORMATION_MESSAGE);
-                });
-            } catch (Exception ex) {
-                showError("Reset Failed", ex);
+            if (pass1.isEmpty() || pass1.length() < 8 || !pass1.matches(".*[^a-zA-Z0-9].*")) {
+                JOptionPane.showMessageDialog(this,
+                        "Password must be at least 8 characters and contain 1 special character.",
+                        "Error", JOptionPane.WARNING_MESSAGE);
+                continue; // Re-show the password prompt
             }
-        }).start();
+
+            if (!pass1.equals(pass2)) {
+                JOptionPane.showMessageDialog(this,
+                        "Passwords do not match. Please try again.",
+                        "Error", JOptionPane.WARNING_MESSAGE);
+                continue; // Re-show the password prompt
+            }
+
+            // Passwords are valid and match — proceed with reset
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            String hashed = SourceCode.UserInstances.PasswordUtil.hashPassword(pf1.getPassword());
+            new Thread(() -> {
+                try {
+                    api.resetPassword(email, otp, hashed);
+                    SwingUtilities.invokeLater(() -> {
+                        setCursor(Cursor.getDefaultCursor());
+                        JOptionPane.showMessageDialog(this,
+                                "Password reset successfully! You can now log in.",
+                                "Success", JOptionPane.INFORMATION_MESSAGE);
+                    });
+                } catch (Exception ex) {
+                    showError("Reset Failed", ex);
+                }
+            }).start();
+            return; // Exit after successfully submitting
+        }
     }
 
     // ─────────────────────────────────────────────────────────────
