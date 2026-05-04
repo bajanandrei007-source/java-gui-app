@@ -18,7 +18,6 @@ import javax.swing.text.*;
  */
 public class CodeEditorApplication extends JPanel {
 
-    // ── Palette ────────────────────────────────────────────────────────────────
     private static final Color  BG_DARK       = new Color(30,  30,  30),
                                 BG_PANEL      = new Color(40,  40,  40),
                                 BG_EDITOR     = new Color(22,  22,  30),
@@ -34,7 +33,6 @@ public class CodeEditorApplication extends JPanel {
                                 FG_ERROR      = new Color(244, 135, 113),   // error red
                                 DIVIDER       = new Color(60,  60,  70);
 
-    // ── Keywords ───────────────────────────────────────────────────────────────
     private static final String[] KEYWORDS = {
         "abstract","assert","boolean","break","byte","case","catch","char",
         "class","const","continue","default","do","double","else","enum",
@@ -53,49 +51,40 @@ public class CodeEditorApplication extends JPanel {
         "Exception","RuntimeException","Thread","Runnable"
     };
 
-    // ── Fields ─────────────────────────────────────────────────────────────────
     private JTextPane  editorPane;
     private JTextArea  consoleArea;
     private StyledDocument editorDoc;
     private boolean    isHighlighting = false;
 
-    // ── Raw button images ──────────────────────────────────────────────────────
     private Image rawBackImg, rawRunImg;
 
-    // ── Constructor ────────────────────────────────────────────────────────────
     public CodeEditorApplication(Runnable onBack) {
         setLayout(new BorderLayout(0, 0));
         setBackground(BG_DARK);
 
-        // Pre-load button images
         rawBackImg = new ImageIcon(getClass().getResource("/Buttons/BackButton.png")).getImage();
         rawRunImg  = new ImageIcon(getClass().getResource("/Buttons/RunButton.png")).getImage();
 
-        // ── Top bar ────────────────────────────────────────────────────────────
         JPanel topBar = buildTopBar(onBack);
         add(topBar, BorderLayout.NORTH);
 
-        // ── Split editor / console ─────────────────────────────────────────────
         JSplitPane split = buildSplitPane();   // sets editorPane & consoleArea
         add(split, BorderLayout.CENTER);
 
         editorDoc = editorPane.getStyledDocument();
 
-        // Seed with a starter template
         SwingUtilities.invokeLater(() -> {
             editorPane.setText(defaultTemplate());
             rehighlight();
         });
     }
 
-    // ── Top bar ────────────────────────────────────────────────────────────────
     private JPanel buildTopBar(Runnable onBack) {
         JPanel bar = new JPanel(new BorderLayout());
         bar.setBackground(BG_PANEL);
         bar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, DIVIDER));
         bar.setPreferredSize(new Dimension(0, 50));
 
-        // Left: Image-based Back button
         int backBtnH = 30;
         int bkImgW = rawBackImg.getWidth(null), bkImgH = rawBackImg.getHeight(null);
         int backBtnW = (bkImgW > 0 && bkImgH > 0)
@@ -168,9 +157,7 @@ public class CodeEditorApplication extends JPanel {
         return bar;
     }
 
-    // ── Split pane ─────────────────────────────────────────────────────────────
     private JSplitPane buildSplitPane() {
-        // ── Editor (left) ──────────────────────────────────────────────────────
         editorPane = new JTextPane();
         editorPane.setBackground(BG_EDITOR);
         editorPane.setForeground(FG_DEFAULT);
@@ -191,11 +178,10 @@ public class CodeEditorApplication extends JPanel {
         editorWrapper.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 4));
         editorWrapper.add(editorScroll, BorderLayout.CENTER);
 
-        // Label
         JLabel editorLabel = panelLabel("  Code Input");
         editorWrapper.add(editorLabel, BorderLayout.NORTH);
 
-        // ── Console (right) ────────────────────────────────────────────────────
+        // right console
         consoleArea = new JTextArea();
         consoleArea.setEditable(false);
         consoleArea.setBackground(BG_CONSOLE);
@@ -214,7 +200,6 @@ public class CodeEditorApplication extends JPanel {
         consoleWrapper.add(panelLabel("  Output Console"), BorderLayout.NORTH);
         consoleWrapper.add(consoleScroll, BorderLayout.CENTER);
 
-        // ── Split ──────────────────────────────────────────────────────────────
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, editorWrapper, consoleWrapper);
         split.setResizeWeight(0.5);
         split.setDividerSize(6);
@@ -229,7 +214,6 @@ public class CodeEditorApplication extends JPanel {
         return split;
     }
 
-    // ── Compile & Run ──────────────────────────────────────────────────────────
     private void runCode() {
         String source = editorPane.getText().trim();
         if (source.isEmpty()) {
@@ -240,7 +224,6 @@ public class CodeEditorApplication extends JPanel {
         consoleArea.setText("");
         appendToConsole("Compiling...\n", false);
 
-        // Extract public class name
         String className = extractClassName(source);
         if (className == null) {
             appendToConsole("Error: Could not find a public class declaration.\n", true);
@@ -256,7 +239,6 @@ public class CodeEditorApplication extends JPanel {
                 try {
                     Files.writeString(srcFile.toPath(), source);
 
-                    // ── Compile ────────────────────────────────────────────────
                     ProcessBuilder compileCmd = new ProcessBuilder("javac", srcFile.getAbsolutePath());
                     compileCmd.redirectErrorStream(true);
                     compileCmd.directory(tmpDir.toFile());
@@ -275,7 +257,6 @@ public class CodeEditorApplication extends JPanel {
 
                     SwingUtilities.invokeLater(() -> appendToConsole("Compiled successfully. Running...\n\n", false));
 
-                    // ── Run ────────────────────────────────────────────────────
                     ProcessBuilder runCmd = new ProcessBuilder("java", "-cp", tmpDir.toString(), className);
                     runCmd.redirectErrorStream(true);
                     runCmd.directory(tmpDir.toFile());
@@ -423,7 +404,6 @@ public class CodeEditorApplication extends JPanel {
             "}\n";
     }
 
-    // ── Dark Scrollbar UI ──────────────────────────────────────────────────────
     private static class DarkScrollBarUI extends javax.swing.plaf.basic.BasicScrollBarUI {
         private static final Color THUMB = new Color(80, 80, 100);
         private static final Color TRACK = new Color(30, 30, 30);
