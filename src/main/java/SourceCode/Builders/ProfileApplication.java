@@ -3,6 +3,8 @@ package SourceCode.Builders;
 import SourceCode.UserInstances.PlayerSession;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.*;
 
@@ -15,6 +17,12 @@ import javax.swing.border.*;
  *    and a visual progress bar.
  *  - The player's current rank on the in-memory leaderboard.
  *
+ * Scaling strategy (matched to MainMenuApplication):
+ *   • BASE_W = 400, BASE_H = 340  ← same reference dimensions as MainMenu.
+ *   • On every resize: liveScale = Math.min(W / BASE_W, H / BASE_H).
+ *   • sc(base) scales dimensions; scFont(base) scales fonts with a cap.
+ *   • A ComponentListener fires layoutComponents() on resize and show.
+ *
  * CRUD notes:
  *  - CREATE  — handled by Login / Registration (PlayerSession.login()).
  *  - READ    — this screen reads live data from PlayerSession on open.
@@ -23,10 +31,16 @@ import javax.swing.border.*;
  */
 public class ProfileApplication extends JPanel {
 
-    private static final double SCALE = Toolkit.getDefaultToolkit().getScreenResolution() / 96.0;
+    // ── Dynamic scaling system (mirrors MainMenuApplication) ──────
+    private static final int BASE_W = 400, BASE_H = 340;
+    private static final double MAX_FONT_SCALE = 2.8;
+    private double liveScale = 1.0;
 
-    private static int s(int base) {
-        return (int) Math.round(base * SCALE);
+    private int sc(int base) {
+        return Math.max(1, (int) Math.round(base * liveScale));
+    }
+    private int scFont(int base) {
+        return Math.max(base, (int) Math.round(base * Math.min(liveScale, MAX_FONT_SCALE)));
     }
 
     private static final Color  BG_DARK      = new Color(42,  37,  64),
@@ -39,9 +53,6 @@ public class ProfileApplication extends JPanel {
                                 TEXT_PRIMARY = new Color(230, 224, 255),
                                 TEXT_MUTED   = new Color(138, 133, 170),
                                 BORDER_COLOR = new Color(74,  69, 112);
-    private static final Font   PIXEL_FONT   = new Font("Courier New", Font.BOLD, 12),
-                                PIXEL_SMALL  = new Font("Courier New", Font.BOLD,  11),
-                                PIXEL_LARGE  = new Font("Courier New", Font.BOLD, 15);
 
     private static final int TOTAL_EASY   = 5,
     						 TOTAL_MEDIUM = 3,
@@ -65,6 +76,28 @@ public class ProfileApplication extends JPanel {
     /** Cached rank string pushed in by the API caller via {@link #setRank(String)}. */
     private String cachedRank = "Unranked";
 
+    // ── Scaling references — sidebar ──────────────────────────────
+    private JPanel sidebar;
+    private Image  rawSchoolImg;
+    private JLabel logoLabel, schoolLabel;
+    private final List<JPanel> navItemPanels = new ArrayList<>();
+    private final List<JLabel> navItemLabels = new ArrayList<>();
+
+    // ── Scaling references — profile card ─────────────────────────
+    private JPanel card;
+    private JLabel profileTitle;
+    private final List<JLabel> decorSeparators = new ArrayList<>();
+    private JPanel usernameRow;
+    private JLabel uKey;
+    private JTextField uEdit;
+    private JButton editBtn;
+    private final List<JPanel> infoRowPanels     = new ArrayList<>();
+    private final List<JLabel> infoRowKeyLabels  = new ArrayList<>();
+    private final List<JLabel> infoRowValLabels  = new ArrayList<>();
+    private JPanel progressContainer, progressLabelRow, barWrap;
+    private JLabel progressLeftLbl;
+    private JButton deleteBtn, logoutBtn;
+
     public ProfileApplication(Runnable onBack, Runnable onLogin) {
         this.onBack  = onBack;
         this.onLogin = onLogin;
@@ -77,6 +110,11 @@ public class ProfileApplication extends JPanel {
 
         add(buildSidebar(),      BorderLayout.WEST);
         add(buildProfilePanel(), BorderLayout.CENTER);
+
+        addComponentListener(new ComponentAdapter() {
+            @Override public void componentResized(ComponentEvent e) { layoutComponents(); }
+            @Override public void componentShown  (ComponentEvent e) { layoutComponents(); }
+        });
     }
 
     /**
@@ -144,19 +182,19 @@ public class ProfileApplication extends JPanel {
     }
 
     private JPanel buildSidebar() {
-        JPanel sidebar = new JPanel();
+        sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBackground(BG_SIDEBAR);
         sidebar.setBorder(new MatteBorder(0, 0, 0, 2, BORDER_COLOR));
         sidebar.setPreferredSize(new Dimension(130, 0));
 
         ImageIcon rawIcon = new ImageIcon(getClass().getResource("/school_logo.png"));
-        Image scaledImg = rawIcon.getImage().getScaledInstance(s(90), s(90), Image.SCALE_SMOOTH);
-        JLabel logoLabel = new JLabel(new ImageIcon(scaledImg));
+        rawSchoolImg = rawIcon.getImage();
+        logoLabel = new JLabel(new ImageIcon(rawSchoolImg.getScaledInstance(90, 90, Image.SCALE_SMOOTH)));
         logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel schoolLabel = new JLabel("OLFU", SwingConstants.CENTER);
-        schoolLabel.setFont(PIXEL_SMALL);
+        schoolLabel = new JLabel("OLFU", SwingConstants.CENTER);
+        schoolLabel.setFont(new Font("Courier New", Font.BOLD, 11));
         schoolLabel.setForeground(ACCENT_GREEN);
         schoolLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -189,7 +227,7 @@ public class ProfileApplication extends JPanel {
         item.setBorder(new MatteBorder(0, 3, 0, 0, BG_SIDEBAR));
 
         JLabel lbl = new JLabel(text);
-        lbl.setFont(PIXEL_SMALL);
+        lbl.setFont(new Font("Courier New", Font.BOLD, 11));
         lbl.setForeground(TEXT_MUTED);
         lbl.setBorder(new EmptyBorder(0, 14, 0, 0));
         item.add(lbl, BorderLayout.CENTER);
@@ -207,6 +245,9 @@ public class ProfileApplication extends JPanel {
                 lbl.setForeground(TEXT_MUTED);
             }
         });
+
+        navItemPanels.add(item);
+        navItemLabels.add(lbl);
         return item;
     }
 	
@@ -224,7 +265,7 @@ public class ProfileApplication extends JPanel {
         JPanel wrapper = new JPanel(new GridBagLayout());
         wrapper.setBackground(BG_DARK);
 
-        JPanel card = new JPanel();
+        card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBackground(BG_PANEL);
         card.setBorder(new CompoundBorder(
@@ -233,28 +274,29 @@ public class ProfileApplication extends JPanel {
         ));
 		
         card.setPreferredSize(new Dimension(500, 480));
-        card.add(centeredLabel("PLAYER PROFILE", PIXEL_LARGE, ACCENT_GREEN));
+        profileTitle = centeredLabel("PLAYER PROFILE", new Font("Courier New", Font.BOLD, 15), ACCENT_GREEN);
+        card.add(profileTitle);
         card.add(Box.createVerticalStrut(3));
-        card.add(centeredLabel("─────────────────────────", PIXEL_SMALL, BORDER_COLOR));
+        card.add(centeredLabel("─────────────────────────", new Font("Courier New", Font.BOLD, 11), BORDER_COLOR));
         card.add(Box.createVerticalStrut(10));
 
-        JPanel usernameRow = new JPanel(new BorderLayout());
+        usernameRow = new JPanel(new BorderLayout());
         usernameRow.setOpaque(false);
         usernameRow.setMaximumSize(new Dimension(420, 30));
         usernameRow.setPreferredSize(new Dimension(420, 30));
 
-        JLabel uKey = new JLabel("Username");
-        uKey.setFont(PIXEL_SMALL);
+        uKey = new JLabel("Username");
+        uKey.setFont(new Font("Courier New", Font.BOLD, 11));
         uKey.setForeground(TEXT_MUTED);
         uKey.setPreferredSize(new Dimension(130, 30));
 
         JLabel    uVal  = new JLabel(username);
-        uVal.setFont(PIXEL_FONT);
+        uVal.setFont(new Font("Courier New", Font.BOLD, 12));
         uVal.setForeground(TEXT_PRIMARY);
         liveUsername = uVal;
 
-        JTextField uEdit = new JTextField(username);
-        uEdit.setFont(PIXEL_FONT);
+        uEdit = new JTextField(username);
+        uEdit.setFont(new Font("Courier New", Font.BOLD, 12));
         uEdit.setForeground(new Color(30, 25, 55));
         uEdit.setBackground(new Color(200, 198, 220));
         uEdit.setBorder(BorderFactory.createCompoundBorder(
@@ -263,8 +305,8 @@ public class ProfileApplication extends JPanel {
         ));
         uEdit.setVisible(false);
 
-        JButton editBtn = new JButton("Edit");
-        editBtn.setFont(PIXEL_SMALL);
+        editBtn = new JButton("Edit");
+        editBtn.setFont(new Font("Courier New", Font.BOLD, 11));
         editBtn.setForeground(ACCENT_GREEN);
         editBtn.setBackground(BG_CARD);
         editBtn.setFocusPainted(false);
@@ -371,7 +413,7 @@ public class ProfileApplication extends JPanel {
         card.add(Box.createVerticalStrut(4));
 
         card.add(Box.createVerticalStrut(10));
-        card.add(centeredLabel("─── STATS ───", PIXEL_SMALL, BORDER_COLOR));
+        card.add(centeredLabel("─── STATS ───", new Font("Courier New", Font.BOLD, 11), BORDER_COLOR));
         card.add(Box.createVerticalStrut(8));
 
         /*
@@ -390,15 +432,15 @@ public class ProfileApplication extends JPanel {
         liveHard        = new JLabel(hardSolved  + " / " + TOTAL_HARD   + "  (Hard)");
 
         card.add(infoRowWithLabel("Rank",         liveRank,        ACCENT_GOLD));
-        card.add(infoRowWithLabel("Total Points", livePoints,      ACCENT_GOLD));
-        card.add(infoRowWithLabel("Total Solved", liveTotalSolved, TEXT_PRIMARY));
+        card.add(infoRowWithLabel("Points",       livePoints,      ACCENT_GOLD));
+        card.add(infoRowWithLabel("Solved",       liveTotalSolved, TEXT_PRIMARY));
         card.add(Box.createVerticalStrut(4));
-        card.add(infoRowWithLabel("  Easy",   liveEasy,   ACCENT_GREEN));
-        card.add(infoRowWithLabel("  Medium", liveMedium, ACCENT_GOLD));
-        card.add(infoRowWithLabel("  Hard",   liveHard,   ACCENT_RED));
+        card.add(infoRowWithLabel("  Easy",       liveEasy,        ACCENT_GREEN));
+        card.add(infoRowWithLabel("  Medium",     liveMedium,      ACCENT_GOLD));
+        card.add(infoRowWithLabel("  Hard",       liveHard,        ACCENT_RED));
         card.add(Box.createVerticalStrut(14));
 
-        card.add(centeredLabel("─── COMPLETION ───", PIXEL_SMALL, BORDER_COLOR));
+        card.add(centeredLabel("─── COMPLETION ───", new Font("Courier New", Font.BOLD, 11), BORDER_COLOR));
         card.add(Box.createVerticalStrut(8));
         card.add(buildProgressBar(totalSolved, TOTAL_ALL));
         card.add(Box.createVerticalStrut(18));
@@ -407,7 +449,7 @@ public class ProfileApplication extends JPanel {
         int delH = 28;
         int delW = (delImgW > 0 && delImgH > 0) ? (int)(delH * ((double) delImgW / delImgH)) : 100;
 
-        JButton deleteBtn = new JButton(new ImageIcon(rawDeleteImg.getScaledInstance(delW, delH, Image.SCALE_SMOOTH)));
+        deleteBtn = new JButton(new ImageIcon(rawDeleteImg.getScaledInstance(delW, delH, Image.SCALE_SMOOTH)));
         deleteBtn.setContentAreaFilled(false);
         deleteBtn.setBorderPainted(false);
         deleteBtn.setFocusPainted(false);
@@ -437,7 +479,7 @@ public class ProfileApplication extends JPanel {
         int logH = 28;
         int logW = (logImgW > 0 && logImgH > 0) ? (int)(logH * ((double) logImgW / logImgH)) : 80;
 
-        JButton logoutBtn = new JButton(new ImageIcon(rawLogoutImg.getScaledInstance(logW, logH, Image.SCALE_SMOOTH)));
+        logoutBtn = new JButton(new ImageIcon(rawLogoutImg.getScaledInstance(logW, logH, Image.SCALE_SMOOTH)));
         logoutBtn.setContentAreaFilled(false);
         logoutBtn.setBorderPainted(false);
         logoutBtn.setFocusPainted(false);
@@ -474,35 +516,29 @@ public class ProfileApplication extends JPanel {
      * @param total  total challenges available
      */
     private JPanel buildProgressBar(int done, int total) {
-        JPanel container = new JPanel();
-        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
-        container.setOpaque(false);
-        container.setMaximumSize(new Dimension(420, 34));
-        container.setPreferredSize(new Dimension(420, 34));
+        progressContainer = new JPanel();
+        progressContainer.setLayout(new BoxLayout(progressContainer, BoxLayout.Y_AXIS));
+        progressContainer.setOpaque(false);
+        progressContainer.setMaximumSize(new Dimension(420, 34));
+        progressContainer.setPreferredSize(new Dimension(420, 34));
 
-        JPanel labelRow = new JPanel(new BorderLayout());
-        labelRow.setOpaque(false);
-        labelRow.setMaximumSize(new Dimension(420, 14));
+        progressLabelRow = new JPanel(new BorderLayout());
+        progressLabelRow.setOpaque(false);
+        progressLabelRow.setMaximumSize(new Dimension(420, 14));
 
-        JLabel leftLbl = new JLabel("Progress");
-        leftLbl.setFont(PIXEL_SMALL);
-        leftLbl.setForeground(TEXT_MUTED);
+        progressLeftLbl = new JLabel("Progress");
+        progressLeftLbl.setFont(new Font("Courier New", Font.BOLD, 11));
+        progressLeftLbl.setForeground(TEXT_MUTED);
 
-        // Assign to instance field so refresh() can call setText() on it
         liveProgressRight = new JLabel(done + " / " + total + " challenges");
-        liveProgressRight.setFont(PIXEL_SMALL);
+        liveProgressRight.setFont(new Font("Courier New", Font.BOLD, 11));
         liveProgressRight.setForeground(TEXT_MUTED);
 
-        labelRow.add(leftLbl,          BorderLayout.WEST);
-        labelRow.add(liveProgressRight, BorderLayout.EAST);
-        container.add(labelRow);
-        container.add(Box.createVerticalStrut(4));
+        progressLabelRow.add(progressLeftLbl, BorderLayout.WEST);
+        progressLabelRow.add(liveProgressRight, BorderLayout.EAST);
+        progressContainer.add(progressLabelRow);
+        progressContainer.add(Box.createVerticalStrut(4));
 
-        /*
-         * The bar reads liveProgress (an instance field) on every repaint.
-         * refresh() updates liveProgress then calls liveBarBg.repaint(),
-         * so the fill always reflects the current completion ratio.
-         */
         liveBarBg = new JPanel(null) {
             @Override protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -527,13 +563,13 @@ public class ProfileApplication extends JPanel {
         liveBarBg.setMaximumSize(new Dimension(420, 14));
         liveBarBg.setPreferredSize(new Dimension(420, 14));
 
-        JPanel barWrap = new JPanel(new BorderLayout());
+        barWrap = new JPanel(new BorderLayout());
         barWrap.setOpaque(false);
         barWrap.setMaximumSize(new Dimension(420, 14));
         barWrap.add(liveBarBg, BorderLayout.CENTER);
-        container.add(barWrap);
+        progressContainer.add(barWrap);
 
-        return container;
+        return progressContainer;
     }
 
     /**
@@ -554,22 +590,22 @@ public class ProfileApplication extends JPanel {
         row.setPreferredSize(new Dimension(420, 24));
 
         JLabel keyLbl = new JLabel(key);
-        keyLbl.setFont(PIXEL_SMALL);
+        keyLbl.setFont(new Font("Courier New", Font.BOLD, 11));
         keyLbl.setForeground(TEXT_MUTED);
         keyLbl.setPreferredSize(new Dimension(150, 24));
 
-        valueLabel.setFont(PIXEL_FONT);
+        valueLabel.setFont(new Font("Courier New", Font.BOLD, 12));
         valueLabel.setForeground(valueColor);
 
         row.add(keyLbl,    BorderLayout.WEST);
         row.add(valueLabel, BorderLayout.CENTER);
+
+        infoRowPanels.add(row);
+        infoRowKeyLabels.add(keyLbl);
+        infoRowValLabels.add(valueLabel);
         return row;
     }
 
-    /**
-     * Legacy string-based info row, kept for any future callers that do not
-     * need a live-updatable label reference.
-     */
     private JPanel infoRow(String key, String value, Color valueColor) {
         return infoRowWithLabel(key, new JLabel(value), valueColor);
     }
@@ -580,6 +616,109 @@ public class ProfileApplication extends JPanel {
         lbl.setForeground(color);
         lbl.setAlignmentX(Component.CENTER_ALIGNMENT);
         lbl.setMaximumSize(new Dimension(420, 22));
+        decorSeparators.add(lbl);
         return lbl;
+    }
+
+    // ── Dynamic layout — called on every resize/show ──────────────
+    private void layoutComponents() {
+        int W = getWidth(), H = getHeight();
+        if (W <= 0 || H <= 0) return;
+        liveScale = Math.min((double) W / BASE_W, (double) H / BASE_H);
+
+        Font fontSmall = new Font("Courier New", Font.BOLD, scFont(11));
+        Font fontNorm  = new Font("Courier New", Font.BOLD, scFont(12));
+        Font fontLarge = new Font("Courier New", Font.BOLD, scFont(15));
+
+        // ── Sidebar: 14% of width ──
+        int sideW = (int)(W * 0.14);
+        sidebar.setPreferredSize(new Dimension(sideW, 0));
+
+        if (rawSchoolImg != null) {
+            int logoSz = Math.max(24, sc(28));
+            logoLabel.setIcon(new ImageIcon(
+                rawSchoolImg.getScaledInstance(logoSz, logoSz, Image.SCALE_SMOOTH)));
+        }
+        schoolLabel.setFont(fontSmall);
+
+        Font navFont = new Font("Courier New", Font.BOLD, Math.max(8, scFont(6)));
+        int navH = Math.max(20, sc(14));
+        for (int i = 0; i < navItemPanels.size(); i++) {
+            navItemPanels.get(i).setMaximumSize(new Dimension(sideW, navH));
+            navItemPanels.get(i).setPreferredSize(new Dimension(sideW, navH));
+            navItemLabels.get(i).setFont(navFont);
+            navItemLabels.get(i).setBorder(new EmptyBorder(0, sc(7), 0, 0));
+        }
+
+        // ── Card: proportional centered card (~60% of available center) ──
+        int availW = W - sideW;
+        int cardW = (int)(availW * 0.60);
+        int cardH = (int)(H * 0.88);
+        card.setPreferredSize(new Dimension(cardW, cardH));
+        card.setBorder(new CompoundBorder(
+            new LineBorder(BORDER_COLOR, Math.max(1, sc(1))),
+            new EmptyBorder(sc(12), sc(18), sc(12), sc(18))
+        ));
+
+        int contentW = (int)(cardW * 0.88);
+
+        // Title + separators
+        profileTitle.setFont(fontLarge);
+        profileTitle.setMaximumSize(new Dimension(contentW, sc(22)));
+        for (JLabel sep : decorSeparators) {
+            if (sep != profileTitle) sep.setFont(fontSmall);
+            sep.setMaximumSize(new Dimension(contentW, sc(22)));
+        }
+
+        // Username row
+        int rowH = scFont(14) + sc(6);
+        usernameRow.setMaximumSize(new Dimension(contentW, rowH));
+        usernameRow.setPreferredSize(new Dimension(contentW, rowH));
+        uKey.setFont(fontSmall);
+        uKey.setPreferredSize(new Dimension((int)(contentW * 0.35), rowH));
+        liveUsername.setFont(fontNorm);
+        uEdit.setFont(fontNorm);
+        editBtn.setFont(fontSmall);
+        editBtn.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(ACCENT_GREEN, Math.max(1, sc(1))),
+            BorderFactory.createEmptyBorder(sc(1), sc(3), sc(1), sc(3))
+        ));
+
+        // Info rows
+        int infoH = scFont(13) + sc(6);
+        for (int i = 0; i < infoRowPanels.size(); i++) {
+            infoRowPanels.get(i).setMaximumSize(new Dimension(contentW, infoH));
+            infoRowPanels.get(i).setPreferredSize(new Dimension(contentW, infoH));
+            infoRowKeyLabels.get(i).setFont(fontSmall);
+            infoRowKeyLabels.get(i).setPreferredSize(new Dimension((int)(contentW * 0.35), infoH));
+            infoRowValLabels.get(i).setFont(fontNorm);
+        }
+
+        // Progress bar (proportional within card)
+        int progW = contentW;
+        progressContainer.setMaximumSize(new Dimension(progW, sc(17)));
+        progressContainer.setPreferredSize(new Dimension(progW, sc(17)));
+        progressLabelRow.setMaximumSize(new Dimension(progW, sc(7)));
+        progressLeftLbl.setFont(fontSmall);
+        liveProgressRight.setFont(fontSmall);
+        int barH = sc(7);
+        liveBarBg.setMaximumSize(new Dimension(progW, barH));
+        liveBarBg.setPreferredSize(new Dimension(progW, barH));
+        barWrap.setMaximumSize(new Dimension(progW, barH));
+
+        // Image buttons scale up
+        int btnH = sc(14);
+        int delImgW = rawDeleteImg.getWidth(null), delImgH = rawDeleteImg.getHeight(null);
+        int delW = (delImgW > 0 && delImgH > 0) ? (int)(btnH * ((double) delImgW / delImgH)) : sc(50);
+        deleteBtn.setIcon(new ImageIcon(rawDeleteImg.getScaledInstance(delW, btnH, Image.SCALE_SMOOTH)));
+        deleteBtn.setPreferredSize(new Dimension(delW, btnH));
+
+        int logImgW = rawLogoutImg.getWidth(null), logImgH = rawLogoutImg.getHeight(null);
+        int logW = (logImgW > 0 && logImgH > 0) ? (int)(btnH * ((double) logImgW / logImgH)) : sc(40);
+        logoutBtn.setIcon(new ImageIcon(rawLogoutImg.getScaledInstance(logW, btnH, Image.SCALE_SMOOTH)));
+        logoutBtn.setPreferredSize(new Dimension(logW, btnH));
+
+        revalidate();
+        repaint();
     }
 }

@@ -86,8 +86,8 @@ public class MainMenuApplication extends JPanel {
     private JPanel                leaderboardPanel, leaderboardList, sidebar;
     private JLabel                schoolLabel, leaderboardHeader, difficultyHeader, challengeHint;
     private Image                 rawSchoolImg;
-    private final List<JPanel>    navItemPanels = new ArrayList<>(),
-                                  navItemLabels = new ArrayList<>();
+    private final List<JPanel>    navItemPanels = new ArrayList<>();
+    private final List<JLabel>    navItemLabels = new ArrayList<>();
 
     private final Runnable onProfile, onPlayground;
 

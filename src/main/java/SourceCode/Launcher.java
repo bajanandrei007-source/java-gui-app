@@ -16,7 +16,6 @@ import java.nio.file.StandardCopyOption;
 
 public class Launcher {
 
-    // ── Replace with your actual GitHub username and repo name ──
     private static final String GITHUB_USER = "bajanandrei007-source";
     private static final String GITHUB_REPO = "java-gui-app";
 

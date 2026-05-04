@@ -85,8 +85,10 @@ public abstract class ChallengeConstructor extends JFrame {
         rawSubmitImg   = new ImageIcon(getClass().getResource("/Buttons/SubmitButton.png")).getImage();
         rawMainMenuImg = new ImageIcon(getClass().getResource("/Buttons/MainMenuButton.png")).getImage();
 
-        setSize(parent.getSize().width, parent.getSize().height);
-        setExtendedState(parent.getExtendedState());
+        // Force fullscreen: get the maximum usable screen area
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        Rectangle screenBounds = ge.getMaximumWindowBounds();
+        setBounds(screenBounds);
         setMinimumSize(new Dimension(900, 560));
         setTitle("Challenge: " + challengeTitle());
         setLayout(new BorderLayout());
@@ -113,8 +115,8 @@ public abstract class ChallengeConstructor extends JFrame {
         add(buildMainSplit(), BorderLayout.CENTER);
         add(buildBottomBar(), BorderLayout.SOUTH);
 
-        setLocationRelativeTo(parent);
         setVisible(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
     /**
