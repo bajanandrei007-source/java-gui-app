@@ -39,7 +39,6 @@ import javax.swing.event.*;
  */
 public abstract class ChallengeConstructor extends JFrame {
 
-    // ── Colour / font constants shared by all subclasses ─────────
     protected static final Color BG_DARK      = new Color(13,  17,  23),
                                   BG_PANEL     = new Color(22,  27,  34),
                                   BG_EDITOR    = new Color(30,  35,  42),
@@ -55,50 +54,22 @@ public abstract class ChallengeConstructor extends JFrame {
                                  UI_FONT   = new Font("Segoe UI",       Font.PLAIN, 13),
                                  UI_BOLD   = new Font("Segoe UI",       Font.BOLD,  13);
 
-    // ── Back-reference to the calling frame ──────────────────────
     private final JFrame parent;
-
-    /**
-     * Called whenever this challenge window closes (via "← Main Menu",
-     * a successful Submit, or the OS window-close button).
-     * Used to make the Main Menu window visible again.
-     */
     private final Runnable onReturn;
 
-    // ── Shared UI components (accessible from inner classes) ──────
     protected JTextArea codeArea, lineNumbers;
     protected JLabel    statusLabel;
-
-    // ── Raw button images (loaded once, scaled when the bars are built) ──
+    
     private Image rawRunImg, rawSubmitImg, rawMainMenuImg;
 
-    /**
-     * The panel below the problem description where test-case result cards appear.
-     * Populated by displayResults() after a run or submit action.
-     */
     protected JPanel testCasePanel;
-
-    // ── Abstract contract for subclasses ──────────────────────────
-    /** Returns the challenge number string, e.g. "1". */
     protected abstract String challengeNumber();
-
-    /** Returns the human-readable challenge title. */
     protected abstract String challengeTitle();
-
-    /** Returns one of: "EASY", "MEDIUM", "HARD". */
-    protected abstract String difficultyLabel();
-
-    /** Returns the colour constant matching the difficulty (e.g. ACCENT_GREEN). */
-    protected abstract Color difficultyColor();
-
-    /** Returns the points rewarded for the first successful full submission. */
-    protected abstract int pointsReward();
-
-    /** Returns the HTML string used to populate the problem description pane. */
     protected abstract String problemHtml();
-
-    /** Returns the starter code pre-filled into the code editor. */
     protected abstract String starterCode();
+    protected abstract String difficultyLabel();
+    protected abstract Color difficultyColor();
+    protected abstract int pointsReward();
 
     /**
      * Returns a Function that, given the student's code as a String,
@@ -106,24 +77,10 @@ public abstract class ChallengeConstructor extends JFrame {
      */
     protected abstract Function<String, TestResult> judgeFunction();
 
-    // ── Constructor ───────────────────────────────────────────────
-    /**
-     * Builds the full challenge UI.
-     *
-     * @param parent  The frame that launched this challenge screen.
-     *                Used to inherit size/state and to return to on "← Main Menu".
-     */
-    // ChallengeConstructor constructor | line 108 | Initialises the window size/title, assembles top bar + split pane + bottom bar, then makes the frame visible
-    /**
-     * @param parent    The JFrame that launched this challenge (the Main Menu host).
-     * @param onReturn  Runnable executed whenever this window closes, so the
-     *                  caller can make the Main Menu visible again.
-     */
     public ChallengeConstructor(JFrame parent, Runnable onReturn) {
         this.parent   = parent;
         this.onReturn = onReturn;
 
-        // Pre-load button images before the UI is assembled
         rawRunImg      = new ImageIcon(getClass().getResource("/Buttons/RunButton.png")).getImage();
         rawSubmitImg   = new ImageIcon(getClass().getResource("/Buttons/SubmitButton.png")).getImage();
         rawMainMenuImg = new ImageIcon(getClass().getResource("/Buttons/MainMenuButton.png")).getImage();
@@ -137,7 +94,6 @@ public abstract class ChallengeConstructor extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setBackground(BG_DARK);
 
-        // When the user closes the window via the OS (X button), restore Main Menu
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosed(java.awt.event.WindowEvent we) {
@@ -145,13 +101,11 @@ public abstract class ChallengeConstructor extends JFrame {
             }
         });
 
-        // Assemble the three main regions
         add(buildTopBar(
             challengeNumber() + ": " + challengeTitle(),
             " " + difficultyLabel(),
             difficultyColor(),
             e -> {
-                // "← Main Menu" button — close this window and restore the Main Menu
                 dispose();       // windowClosed listener will call onReturn
             }
         ), BorderLayout.NORTH);
@@ -163,12 +117,10 @@ public abstract class ChallengeConstructor extends JFrame {
         setVisible(true);
     }
 
-    // ── Main split pane ───────────────────────────────────────────
     /**
      * Creates the horizontal JSplitPane dividing the problem panel (left)
      * from the code editor (right). The divider starts at 370 px.
      */
-    // buildMainSplit | line 144 | Creates the horizontal split between the problem description (left) and the code editor (right)
     private JSplitPane buildMainSplit() {
         JSplitPane split = new JSplitPane(
             JSplitPane.HORIZONTAL_SPLIT,
@@ -182,7 +134,6 @@ public abstract class ChallengeConstructor extends JFrame {
         return split;
     }
 
-    // ── Top bar ───────────────────────────────────────────────────
     /**
      * Builds the top bar containing:
      *  LEFT  — challenge title + difficulty badge.
@@ -195,7 +146,6 @@ public abstract class ChallengeConstructor extends JFrame {
      * @param diffColor  Colour for the difficulty badge text.
      * @param onBack     ActionListener triggered by the back button.
      */
-    // buildTopBar | line 171 | Builds the top bar with the challenge title + difficulty badge on the left and a "← Main Menu" button on the right
     protected JPanel buildTopBar(String title, String difficulty,
                                   Color diffColor, ActionListener onBack) {
         JPanel bar = new JPanel(new BorderLayout());
@@ -218,7 +168,6 @@ public abstract class ChallengeConstructor extends JFrame {
         left.add(titleLbl);
         left.add(diffLbl);
 
-        // ── Image-based Main Menu button ─────────────────────────
         int backBtnH = 28;
         int mmImgW = rawMainMenuImg.getWidth(null), mmImgH = rawMainMenuImg.getHeight(null);
         int backBtnW = (mmImgW > 0 && mmImgH > 0)
@@ -250,7 +199,6 @@ public abstract class ChallengeConstructor extends JFrame {
         return bar;
     }
 
-    // ── Left panel (problem + test-case results) ──────────────────
     /**
      * Builds the left side of the split pane.
      *
@@ -259,7 +207,6 @@ public abstract class ChallengeConstructor extends JFrame {
      *
      * @param html  The problem description HTML string.
      */
-    // buildLeftPanel | line 211 | Builds the left split pane: HTML problem description (top) and scrollable test-case result cards (bottom)
     protected JPanel buildLeftPanel(String html) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BG_PANEL);
@@ -277,7 +224,6 @@ public abstract class ChallengeConstructor extends JFrame {
         problemScroll.setPreferredSize(new Dimension(370, 230));
         problemScroll.getViewport().setBackground(BG_PANEL);
 
-        // Test-case result area
         testCasePanel = new JPanel();
         testCasePanel.setLayout(new BoxLayout(testCasePanel, BoxLayout.Y_AXIS));
         testCasePanel.setBackground(BG_PANEL);
@@ -302,7 +248,6 @@ public abstract class ChallengeConstructor extends JFrame {
         return panel;
     }
 
-    // ── Right panel (code editor) ─────────────────────────────────
     /**
      * Builds the code editor on the right side:
      *  NORTH  — language badge ("JAVA").
@@ -310,7 +255,6 @@ public abstract class ChallengeConstructor extends JFrame {
      *
      * @param code  Starter code to pre-fill the editor.
      */
-    // buildRightPanel | line 261 | Builds the code editor panel with a language badge header and a line-numbered textarea pre-filled with starter code
     protected JPanel buildRightPanel(String code) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BG_EDITOR);
@@ -328,7 +272,6 @@ public abstract class ChallengeConstructor extends JFrame {
         editorHeader.setBorder(new MatteBorder(0, 0, 1, 0, BORDER_COLOR));
         editorHeader.add(langBadge);
 
-        // Code area
         codeArea = new JTextArea();
         codeArea.setFont(MONO_FONT);
         codeArea.setBackground(BG_EDITOR);
@@ -338,7 +281,6 @@ public abstract class ChallengeConstructor extends JFrame {
         codeArea.setBorder(new EmptyBorder(8, 10, 8, 10));
         codeArea.setText(code);
 
-        // Line-number gutter (read-only, updates with the document)
         lineNumbers = new JTextArea();
         lineNumbers.setBackground(new Color(22, 27, 34));
         lineNumbers.setForeground(TEXT_MUTED);
@@ -366,7 +308,6 @@ public abstract class ChallengeConstructor extends JFrame {
         return panel;
     }
 
-    // ── Bottom bar ────────────────────────────────────────────────
     /**
      * Builds the bottom bar containing:
      *  LEFT   — status label (shows compile errors, pass/fail counts, etc.)
@@ -387,7 +328,6 @@ public abstract class ChallengeConstructor extends JFrame {
         statusLabel.setFont(UI_FONT);
         statusLabel.setForeground(TEXT_MUTED);
 
-        // ── Image-based Run button ───────────────────────────────
         int btnH = 30;
         int runImgW = rawRunImg.getWidth(null), runImgH = rawRunImg.getHeight(null);
         int runBtnW = (runImgW > 0 && runImgH > 0)
@@ -414,7 +354,6 @@ public abstract class ChallengeConstructor extends JFrame {
         });
         runButton.addActionListener(e -> runSampleTests(runButton));
 
-        // ── Image-based Submit button ────────────────────────────
         int subImgW = rawSubmitImg.getWidth(null), subImgH = rawSubmitImg.getHeight(null);
         int subBtnW = (subImgW > 0 && subImgH > 0)
                       ? (int)(btnH * ((double) subImgW / subImgH)) : 80;
@@ -450,7 +389,6 @@ public abstract class ChallengeConstructor extends JFrame {
         return bar;
     }
 
-    // ── Run (sample cases only) ───────────────────────────────────
     /**
      * Executes only the first 3 test cases (sample cases) for quick feedback.
      *
@@ -528,7 +466,6 @@ public abstract class ChallengeConstructor extends JFrame {
         worker.execute();
     }
 
-    // ── Submit (all cases) ────────────────────────────────────────
     /**
      * Executes ALL test cases and grades the submission.
      *
@@ -584,10 +521,8 @@ public abstract class ChallengeConstructor extends JFrame {
                     }
 
                     if (result.allPassed()) {
-                        // ── Full pass ──────────────────────────────────────────
                         setStatus("✔  All " + total + " test cases passed! Saving to cloud...", ACCENT_GREEN);
 
-                        // Dynamically grab the challenge info using your abstract methods
                         String diff = difficultyLabel();
                         String num = challengeNumber();
                         String fullChallengeId = diff + "-" + num;
@@ -669,8 +604,6 @@ public abstract class ChallengeConstructor extends JFrame {
         };
         worker.execute();
     }
-
-    // ── Display helpers ───────────────────────────────────────────
 
     /**
      * Displays a compile / runtime / timeout / system-error card in the test-case panel.
@@ -770,8 +703,6 @@ public abstract class ChallengeConstructor extends JFrame {
         wrapper.add(card);
         testCasePanel.add(wrapper);
     }
-
-    // ── Utility helpers ───────────────────────────────────────────
 
     /**
      * Updates the line-number gutter to match the current line count in codeArea.
